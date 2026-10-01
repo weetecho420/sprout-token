@@ -1,0 +1,13 @@
+# Never commit wallet keys or secrets
+*.json.key
+*keypair*.json
+*deployer*.json
+id.json
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+dist/
+.DS_Store

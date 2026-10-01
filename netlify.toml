@@ -1,0 +1,3 @@
+# Netlify serves the landing page from the site/ folder.
+[build]
+  publish = "site"
