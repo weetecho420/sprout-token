@@ -11,3 +11,6 @@ id.json
 node_modules/
 dist/
 .DS_Store
+
+# Built by Netlify from app/
+site/app/

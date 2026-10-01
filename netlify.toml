@@ -1,3 +1,14 @@
-# Netlify serves the landing page from the site/ folder.
+# Netlify builds the node sale app into site/app, then publishes site/
+# (the landing page at / and the app at /app/).
 [build]
   publish = "site"
+  command = "cd app && npm ci && npm run build"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# The app uses #/ links, but send any deep link back to it just in case
+[[redirects]]
+  from = "/app/*"
+  to = "/app/index.html"
+  status = 200
