@@ -1,14 +1,30 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { buyLicenses, friendlyError } from './solana';
+import { buyLicenses, friendlyError, getMintedCount } from './solana';
 import { explorerUrl } from './config';
 import { formatDate, fmt, solText, minPerDay } from './format';
 import { IconExternal } from './icons.jsx';
 
 export default function CheckoutPage({ sale, onBought }) {
   const wallet = useWallet();
-  const max = Math.max(1, Math.min(sale.maxPerWallet, sale.remaining || sale.maxPerWallet));
+  const owner = wallet.publicKey?.toBase58();
+  const [bought, setBought] = useState(0); // licenses this wallet already has from the sale
+  const [doneCount, setDoneCount] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    setBought(0);
+    if (owner && sale.configured) {
+      getMintedCount(owner, sale)
+        .then((n) => alive && setBought(n))
+        .catch(() => {});
+    }
+    return () => {
+      alive = false;
+    };
+  }, [owner, sale.configured, sale.candyGuard, sale.mintLimitId, doneCount]);
+  const walletLeft = Math.max(0, sale.maxPerWallet - bought);
+  const max = Math.max(1, Math.min(walletLeft || 1, sale.remaining || sale.maxPerWallet));
   const [qty, setQty] = useState(1);
   const [agreed, setAgreed] = useState(false);
   const [busy, setBusy] = useState(null); // { i, n }
@@ -23,6 +39,7 @@ export default function CheckoutPage({ sale, onBought }) {
   else if (sale.soldOut) blocker = 'All licenses are sold.';
   else if (!sale.isLive && sale.startsAt) blocker = `The sale opens ${formatDate(sale.startsAt)}.`;
   else if (!wallet.connected) blocker = 'Connect your wallet to continue.';
+  else if (walletLeft === 0) blocker = `This wallet already has the maximum of ${sale.maxPerWallet} licenses.`;
   else if (!agreed) blocker = 'Tick the box above to continue.';
 
   async function pay() {
@@ -31,6 +48,7 @@ export default function CheckoutPage({ sale, onBought }) {
     try {
       const minted = await buyLicenses(wallet, sale, q, (i, n) => setBusy({ i, n }));
       setDone(minted);
+      setDoneCount((c) => c + 1);
       onBought?.();
     } catch (e) {
       console.error(e);
@@ -74,6 +92,12 @@ export default function CheckoutPage({ sale, onBought }) {
           {solText(sale.priceSol)} per node · max {sale.maxPerWallet} per wallet
           {sale.configured ? ` · ${fmt(sale.remaining)} left` : ''}
         </p>
+        {owner && sale.configured && bought > 0 && (
+          <p className="muted small">
+            This wallet has {bought} of {sale.maxPerWallet}
+            {walletLeft > 0 ? `, so you can buy ${walletLeft} more.` : '.'}
+          </p>
+        )}
       </section>
 
       <section className="card">
