@@ -4,21 +4,17 @@ Scripts that create the Grower Node license NFTs and the Candy Machine that sell
 
 **Always run everything on devnet first.** Only switch `RPC_URL` to mainnet for the real sale.
 
-## Setup
+## Setup (Windows, Mac or Linux)
 
-1. Install [Node.js](https://nodejs.org) 20 or newer and the [Solana CLI](https://docs.solana.com/cli/install-solana-cli-tools).
-2. Make a deploy wallet, outside this repo:
+1. Install [Node.js](https://nodejs.org) 22 LTS. No Solana CLI needed.
+2. Open a terminal in this `node-sale` folder and run:
    ```bash
-   solana-keygen new -o ~/sprout-deployer.json
-   solana config set --keypair ~/sprout-deployer.json --url devnet
-   solana airdrop 2
-   ```
-3. Install and configure:
-   ```bash
-   cd node-sale
    npm install
-   cp .env.example .env   # then fill in RPC_URL, DEPLOYER_KEYPAIR, TREASURY
+   npm run new-wallet
    ```
+   This creates your deploy wallet in your home folder (outside the repo) and prints its address.
+3. Get free devnet SOL: open [faucet.solana.com](https://faucet.solana.com), paste the address, pick **Devnet**, request 2 SOL.
+4. Copy `.env.example` to `.env` (Windows: `copy .env.example .env`) and fill in `RPC_URL`, `DEPLOYER_KEYPAIR` (the path `new-wallet` printed) and `TREASURY` (your wallet address).
 
 ## Create the sale
 

@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Scripts that create the Sprout Grower Node license collection and Candy Machine on Solana.",
   "scripts": {
+    "new-wallet": "node scripts/new-wallet.mjs",
     "upload": "node --env-file=.env scripts/upload.mjs",
     "setup": "node --env-file=.env scripts/setup.mjs"
   },
