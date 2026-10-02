@@ -8,6 +8,7 @@ import {
   fetchCandyMachine,
   safeFetchCandyGuard,
   mintV1,
+  safeFetchMintCounterFromSeeds,
 } from '@metaplex-foundation/mpl-core-candy-machine';
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import { CONFIG } from './config';
@@ -38,8 +39,21 @@ export async function loadSale() {
     startsAt: start ? Number(start.date) * 1000 : null,
     maxPerWallet: limit ? limit.limit : CONFIG.defaults.maxPerWallet,
     mintLimitId: limit ? limit.id : null,
+    candyGuard: cm.mintAuthority.toString(),
     collection: cm.collectionMint.toString(),
   };
+}
+
+/** How many licenses this wallet has already bought (the on-chain counter the limit uses). */
+export async function getMintedCount(owner, sale) {
+  if (!owner || !sale?.candyGuard || sale.mintLimitId === null || sale.mintLimitId === undefined) return 0;
+  const counter = await safeFetchMintCounterFromSeeds(makeUmi(), {
+    id: sale.mintLimitId,
+    user: publicKey(owner),
+    candyGuard: publicKey(sale.candyGuard),
+    candyMachine: publicKey(CONFIG.candyMachine),
+  });
+  return counter ? counter.count : 0;
 }
 
 /** Mints `qty` licenses, one transaction each. Calls onProgress(i, qty) before each. */
