@@ -10,6 +10,9 @@ export const CONFIG = {
     env.VITE_RPC_URL ||
     (network === 'devnet' ? 'https://api.devnet.solana.com' : 'https://api.mainnet-beta.solana.com'),
   candyMachine: env.VITE_CANDY_MACHINE || '',
+  // Sprout Node backend (Supabase). Both values are public by design.
+  supabaseUrl: env.VITE_SUPABASE_URL || 'https://dmfhvxrxkilszdrbghqh.supabase.co',
+  supabaseKey: env.VITE_SUPABASE_KEY || 'sb_publishable_xBOm_D5LW7ifZIxFuYlIgw_b_7Gtexh',
   // Shown until the Candy Machine is set up, and as a fallback
   defaults: {
     priceSol: 0.5,

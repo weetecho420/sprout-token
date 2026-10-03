@@ -2,13 +2,32 @@ import { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { getMyLicenses } from './solana';
+import { getNodeStatus, isOnline, stageFor } from './node';
 import { explorerUrl } from './config';
+import { duration, sprout } from './format';
 import { IconExternal } from './icons.jsx';
 
-export default function NodesPage({ sale }) {
+export default function NodesPage({ sale, now }) {
   const { publicKey } = useWallet();
   const [state, setState] = useState({ loading: false, items: [], error: '' });
   const owner = publicKey?.toBase58();
+  const [status, setStatus] = useState({});
+
+  // Online status, uptime and earnings from the node network (refreshes every 30s)
+  useEffect(() => {
+    if (!owner) return;
+    let alive = true;
+    const load = () =>
+      getNodeStatus(owner)
+        .then((list) => alive && setStatus(Object.fromEntries(list.map((n) => [n.asset, n]))))
+        .catch(() => {});
+    load();
+    const t = setInterval(load, 30000);
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
+  }, [owner]);
 
   useEffect(() => {
     if (!owner || !sale.collection) return;
@@ -53,6 +72,9 @@ export default function NodesPage({ sale }) {
     );
   }
 
+  const unclaimed = state.items.reduce((sum, n) => sum + (status[n.address]?.earned || 0), 0);
+  const onlineCount = state.items.filter((n) => isOnline(status[n.address], now)).length;
+
   return (
     <div className="stack">
       <section className="hero compact">
@@ -68,13 +90,16 @@ export default function NodesPage({ sale }) {
           </div>
           <div className="stat">
             <span className="label">Unclaimed $SPROUT</span>
-            <strong className="num">0</strong>
+            <strong className="num">{sprout(unclaimed)}</strong>
           </div>
         </div>
+        <a className="btn primary" href="#/run">
+          {onlineCount ? `${onlineCount} online · open node` : 'Run your node'}
+        </a>
         <button type="button" className="btn ghost" disabled>
           Claim $SPROUT
         </button>
-        <p className="muted small">Rewards start once the Sprout Node app is live and your node is online.</p>
+        <p className="muted small">Earnings are saved while your node runs. Claiming opens after $SPROUT launches.</p>
       </section>
 
       {state.error && <p className="alert bad">{state.error}</p>}
@@ -88,23 +113,30 @@ export default function NodesPage({ sale }) {
         </section>
       )}
 
-      {state.items.map((n) => (
+      {state.items.map((n) => {
+        const st = status[n.address];
+        const online = isOnline(st, now);
+        const stage = stageFor(st?.uptimeSeconds || 0);
+        return (
         <section className="card node" key={n.address}>
           <div className="node-top">
             <div>
               <strong>{n.name}</strong>
-              <span className="muted small">Seed · waiting for the node app</span>
+              <span className="muted small">
+                {stage.name} · {st ? `${duration(st.uptimeSeconds)} online · ${sprout(st.earned)} earned` : 'never run yet'}
+              </span>
             </div>
-            <span className="pill">+0/day</span>
+            <span className={`pill ${online ? 'on' : ''}`}>{online ? `Online · +${stage.perDay}/day` : 'Offline'}</span>
           </div>
           <div className="bar" aria-hidden="true">
-            <i style={{ width: '0%' }} />
+            <i style={{ width: `${Math.round(stage.progress * 100)}%` }} />
           </div>
           <a className="small link" href={explorerUrl('token', n.address)} target="_blank" rel="noopener">
             View license on Solscan <IconExternal />
           </a>
         </section>
-      ))}
+        );
+      })}
     </div>
   );
 }

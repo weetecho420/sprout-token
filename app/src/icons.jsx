@@ -34,3 +34,9 @@ export const IconExternal = () => (
     <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
   </svg>
 );
+export const IconRun = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" {...S}>
+    <path d="M12 3v8" />
+    <path d="M6.3 7.3a8 8 0 1 0 11.4 0" />
+  </svg>
+);
