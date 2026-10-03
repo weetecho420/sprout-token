@@ -1,0 +1,69 @@
+/* Same dark look as the Node Sale app. System fonts keep the app small. */
+:root {
+  --bg: #0c100c;
+  --card: #121812;
+  --card-2: #172317;
+  --line: #243024;
+  --text: #eef3ea;
+  --muted: #9aa896;
+  --lime: #c6f26b;
+  --good: #7ee08f;
+  --bad: #f0a48c;
+  --font: 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+body { padding: 0 18px 22px; user-select: none; }
+h1, h2, p { margin: 0; }
+h1 { font-size: 24px; font-weight: 800; line-height: 1.15; color: var(--lime); text-wrap: balance; }
+h2 { font-size: 17px; font-weight: 700; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+.testbar { margin-top: 12px; padding: 7px 12px; border-radius: 10px; background: #2b2410; color: #f2d58a; font-size: 12.5px; font-weight: 600; text-align: center; }
+.top { display: flex; align-items: center; gap: 10px; padding: 14px 0; font-weight: 800; font-size: 17px; }
+.top img { border-radius: 7px; }
+
+.view { display: flex; flex-direction: column; gap: 12px; }
+.view[hidden] { display: none; }
+.hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 18px 4px 6px; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.card.center { align-items: center; text-align: center; }
+
+.orb { width: 110px; height: 110px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle, #1f2e1f 0%, #121812 70%); border: 1.5px solid var(--line); }
+.runner.on .orb { border-color: var(--good); animation: breathe 3s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { box-shadow: 0 0 0 0 rgba(126, 224, 143, 0.35); } 50% { box-shadow: 0 0 0 16px rgba(126, 224, 143, 0); } }
+.state { font-size: 24px; font-weight: 800; color: var(--muted); }
+.state.good { color: var(--good); }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; text-align: left; }
+.stat { background: var(--card-2); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; min-width: 0; }
+.stat strong { font-size: 20px; font-variant-numeric: tabular-nums; }
+
+.btn { width: 100%; min-height: 46px; border-radius: 23px; border: 0; font: 700 15px var(--font); cursor: pointer; }
+.btn.primary { background: var(--lime); color: var(--bg); }
+.btn.ghost { background: transparent; color: var(--lime); border: 1.5px solid var(--lime); }
+.btn.text { background: transparent; color: var(--muted); min-height: 36px; width: auto; padding: 0 8px; }
+.btn.text:hover { color: var(--text); }
+.btn.danger:hover { color: var(--bad); }
+
+.qr { background: #fff; padding: 10px; border-radius: 16px; line-height: 0; }
+.qr img { width: 220px; height: 220px; }
+.code { font-size: 30px; font-weight: 800; letter-spacing: 0.08em; color: var(--lime); font-variant-numeric: tabular-nums; }
+
+.alert { padding: 10px 12px; border-radius: 12px; background: #1b2a1d; color: #cfe8c9; font-size: 13.5px; }
+.alert.bad { background: #2c1a14; color: var(--bad); }
+.alert[hidden] { display: none; }
+
+.nodes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.nodes li { display: flex; flex-direction: column; padding: 10px 12px; border-radius: 12px; background: #0e140e; border-left: 4px solid var(--c, var(--line)); }
+.nodes li strong { color: var(--c, var(--text)); }
+
+.settings .row { display: flex; justify-content: space-between; }
+.switch { display: flex; align-items: center; gap: 10px; font-weight: 600; cursor: pointer; }
+.switch input { width: 18px; height: 18px; accent-color: var(--lime); }

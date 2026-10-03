@@ -82,3 +82,22 @@ export function stageFor(uptimeSeconds = 0) {
   const progress = next ? (days - cur.afterDays) / (next.afterDays - cur.afterDays) : 1;
   return { ...cur, index: i, next, progress: Math.max(0, Math.min(1, progress)) };
 }
+
+/** Approves a desktop/Android node app: the wallet signs a message with the app's pairing code. */
+export async function approvePairing(wallet, code, assets) {
+  if (!wallet.signMessage) throw new Error("This wallet can't sign messages. Try Phantom or Solflare.");
+  const owner = wallet.publicKey.toBase58();
+  const message =
+    `Sprout Node pairing\n\nWallet: ${owner}\nCode: ${code}\nTime: ${new Date().toISOString()}\n\n` +
+    'This lets the device showing this code run your Grower Nodes. It\'s free and can\'t move your funds.';
+  let sig;
+  try {
+    sig = await wallet.signMessage(new TextEncoder().encode(message));
+  } catch {
+    throw new Error('You cancelled in your wallet. Nothing was paired.');
+  }
+  return call('pair-approve', { owner, message, signature: bs58.encode(sig), assets });
+}
+
+/** Where people download the desktop node app. */
+export const DESKTOP_DOWNLOAD_URL = 'https://github.com/weetecho420/sprout-token/releases/latest';

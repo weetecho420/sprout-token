@@ -3,7 +3,13 @@
 //   login     wallet signs a message once; we check the signature and that it owns
 //             Grower Node licenses on-chain, then hand back a session token.
 //   heartbeat sent every minute while the node runs; credits online time.
-//   stop      credits the last stretch and marks the nodes offline.
+//   stop      credits the last stretch and marks the nodes offline (desktop: pause).
+//   unpair    ends a device session.
+//
+// Device pairing (desktop / Android node apps):
+//   pair-start    the app sends a random secret, gets a short code to show as a QR.
+//   pair-approve  the wallet signs a message with that code on the phone.
+//   pair-check    the app polls with its secret and collects a long-lived device session.
 //
 // Auth is the wallet signature + session token, so verify_jwt is off.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
@@ -15,6 +21,9 @@ const CORE_PROGRAM = "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d";
 const GAP_SECONDS = 180; // miss 3 minutes of heartbeats and the node counts as offline
 const REVERIFY_MS = 10 * 60 * 1000; // re-check on-chain ownership every 10 minutes
 const SESSION_HOURS = 24;
+const DEVICE_SESSION_DAYS = 365;
+const PAIR_MINUTES = 10;
+const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const MAX_ASSETS = 20;
 
 const cors = {
@@ -76,54 +85,127 @@ const publicNode = (n: any) => ({
   lastSeen: n.last_seen,
 });
 
-async function login(body: any) {
+/** Checks a signed sign-in/pairing message and the wallet's licenses. Returns licenses or an error Response. */
+async function verifySigned(body: any, kind: "sign-in" | "pairing") {
   const { owner, message, signature, assets } = body ?? {};
   if (typeof owner !== "string" || typeof message !== "string" || typeof signature !== "string") {
-    return reply(400, { error: "Missing sign-in details." });
+    return { error: reply(400, { error: "Missing sign-in details." }) };
   }
-  const m = /^Sprout Node sign-in\n\nWallet: (\S+)\nTime: (\S+)\n/.exec(message);
-  if (!m || m[1] !== owner) return reply(400, { error: "That sign-in message isn't valid." });
-  const age = Math.abs(Date.now() - Date.parse(m[2]));
-  if (!(age < 5 * 60 * 1000)) return reply(400, { error: "That sign-in expired. Check your phone's clock and try again." });
-
+  const re =
+    kind === "sign-in"
+      ? /^Sprout Node sign-in\n\nWallet: (\S+)\nTime: (\S+)\n/
+      : /^Sprout Node pairing\n\nWallet: (\S+)\nCode: (\S+)\nTime: (\S+)\n/;
+  const m = re.exec(message);
+  if (!m || m[1] !== owner) return { error: reply(400, { error: "That message isn't valid." }) };
+  const time = kind === "sign-in" ? m[2] : m[3];
+  const age = Math.abs(Date.now() - Date.parse(time));
+  if (!(age < 5 * 60 * 1000)) {
+    return { error: reply(400, { error: "That signature expired. Check your phone's clock and try again." }) };
+  }
   let ok = false;
   try {
     ok = nacl.sign.detached.verify(new TextEncoder().encode(message), bs58.decode(signature), bs58.decode(owner));
   } catch {
     ok = false;
   }
-  if (!ok) return reply(401, { error: "The wallet signature didn't match." });
+  if (!ok) return { error: reply(401, { error: "The wallet signature didn't match." }) };
 
   const cfg = await getConfig();
-  if (!cfg.collection) return reply(503, { error: "The node network isn't switched on yet." });
+  if (!cfg.collection) return { error: reply(503, { error: "The node network isn't switched on yet." }) };
   const list = Array.isArray(assets) ? assets.filter((a) => typeof a === "string").slice(0, MAX_ASSETS) : [];
   const licenses = await verifyLicenses(cfg, owner, list);
-  if (!licenses.length) return reply(403, { error: "No Grower Node license found in this wallet." });
+  if (!licenses.length) return { error: reply(403, { error: "No Grower Node license found in this wallet." }) };
 
   const now = new Date().toISOString();
   const { error: upErr } = await db
     .from("sprout_nodes")
     .upsert(licenses.map((l) => ({ asset: l.asset, owner, name: l.name, verified_at: now })), { onConflict: "asset" });
   if (upErr) throw upErr;
+  return { owner: owner as string, licenses, code: kind === "pairing" ? m[2] : null };
+}
 
-  await db.from("sprout_sessions").delete().lt("expires_at", now);
-  const { data: session, error: sErr } = await db
+async function newSession(owner: string, kind: "web" | "device", device: string | null = null) {
+  const ms = kind === "web" ? SESSION_HOURS * 3600 * 1000 : DEVICE_SESSION_DAYS * 86400 * 1000;
+  await db.from("sprout_sessions").delete().lt("expires_at", new Date().toISOString());
+  const { data, error } = await db
     .from("sprout_sessions")
-    .insert({ owner, expires_at: new Date(Date.now() + SESSION_HOURS * 3600 * 1000).toISOString() })
+    .insert({ owner, kind, device, expires_at: new Date(Date.now() + ms).toISOString() })
     .select("token")
     .single();
-  if (sErr) throw sErr;
+  if (error) throw error;
+  return data.token as string;
+}
 
-  const { data: nodes } = await db.rpc("sprout_credit", { p_assets: licenses.map((l) => l.asset), p_gap: GAP_SECONDS });
-  return reply(200, { token: session.token, nodes: (nodes ?? []).map(publicNode) });
+async function login(body: any) {
+  const v = await verifySigned(body, "sign-in");
+  if ("error" in v) return v.error;
+  const token = await newSession(v.owner, "web");
+  const { data: nodes } = await db.rpc("sprout_credit", { p_assets: v.licenses.map((l) => l.asset), p_gap: GAP_SECONDS });
+  return reply(200, { token, nodes: (nodes ?? []).map(publicNode) });
+}
+
+async function sha256Hex(text: string) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function newCode() {
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  const chars = Array.from(bytes, (b) => CODE_ALPHABET[b % CODE_ALPHABET.length]).join("");
+  return `${chars.slice(0, 4)}-${chars.slice(4)}`;
+}
+
+async function pairStart(body: any) {
+  const { secret, device } = body ?? {};
+  if (typeof secret !== "string" || secret.length < 32 || secret.length > 200) {
+    return reply(400, { error: "Missing pairing secret." });
+  }
+  const name = typeof device === "string" ? device.slice(0, 40) : null;
+  await db.from("sprout_pairings").delete().lt("expires_at", new Date().toISOString());
+  const expires = new Date(Date.now() + PAIR_MINUTES * 60 * 1000).toISOString();
+  for (let i = 0; i < 5; i++) {
+    const code = newCode();
+    const { error } = await db
+      .from("sprout_pairings")
+      .insert({ code, secret_hash: await sha256Hex(secret), device: name, expires_at: expires });
+    if (!error) return reply(200, { code, expiresAt: expires });
+  }
+  throw new Error("Could not create a pairing code");
+}
+
+async function pairApprove(body: any) {
+  const v = await verifySigned(body, "pairing");
+  if ("error" in v) return v.error;
+  const code = String(v.code || "").toUpperCase();
+  const { data: p } = await db.from("sprout_pairings").select("*").eq("code", code).maybeSingle();
+  if (!p || Date.parse(p.expires_at) < Date.now()) {
+    return reply(410, { error: "That pairing code expired. Get a new one from the desktop app." });
+  }
+  if (p.token) return reply(409, { error: "That code was already used." });
+  const token = await newSession(v.owner, "device", p.device);
+  await db.from("sprout_pairings").update({ owner: v.owner, token }).eq("code", code);
+  return reply(200, { ok: true, device: p.device, licenses: v.licenses.length });
+}
+
+async function pairCheck(body: any) {
+  const { code, secret } = body ?? {};
+  if (typeof code !== "string" || typeof secret !== "string") return reply(400, { error: "Missing code." });
+  const { data: p } = await db.from("sprout_pairings").select("*").eq("code", code.toUpperCase()).maybeSingle();
+  if (!p || p.secret_hash !== (await sha256Hex(secret))) return reply(404, { status: "unknown" });
+  if (!p.token) {
+    if (Date.parse(p.expires_at) < Date.now()) return reply(410, { status: "expired" });
+    return reply(200, { status: "pending" });
+  }
+  await db.from("sprout_pairings").delete().eq("code", p.code);
+  return reply(200, { status: "paired", token: p.token, owner: p.owner });
 }
 
 async function sessionNodes(token: unknown) {
   if (typeof token !== "string" || !/^[0-9a-f-]{36}$/i.test(token)) return null;
-  const { data: s } = await db.from("sprout_sessions").select("owner, expires_at").eq("token", token).maybeSingle();
+  const { data: s } = await db.from("sprout_sessions").select("owner, expires_at, kind").eq("token", token).maybeSingle();
   if (!s || Date.parse(s.expires_at) < Date.now()) return null;
   const { data: nodes } = await db.from("sprout_nodes").select("*").eq("owner", s.owner);
-  return { owner: s.owner as string, nodes: nodes ?? [] };
+  return { owner: s.owner as string, kind: s.kind as string, nodes: nodes ?? [] };
 }
 
 async function heartbeat(body: any) {
@@ -149,7 +231,7 @@ async function heartbeat(body: any) {
 
   const { data: nodes, error } = await db.rpc("sprout_credit", { p_assets: assets, p_gap: GAP_SECONDS });
   if (error) throw error;
-  return reply(200, { nodes: (nodes ?? []).map(publicNode) });
+  return reply(200, { owner: s.owner, nodes: (nodes ?? []).map(publicNode) });
 }
 
 async function stop(body: any) {
@@ -158,8 +240,19 @@ async function stop(body: any) {
   const assets = s.nodes.map((n: any) => n.asset);
   const { data: nodes } = await db.rpc("sprout_credit", { p_assets: assets, p_gap: GAP_SECONDS });
   await db.from("sprout_nodes").update({ last_seen: null }).in("asset", assets);
-  await db.from("sprout_sessions").delete().eq("token", body.token);
+  if (s.kind !== "device") await db.from("sprout_sessions").delete().eq("token", body.token);
   return reply(200, { nodes: (nodes ?? []).map((n: any) => ({ ...publicNode(n), lastSeen: null })) });
+}
+
+async function unpair(body: any) {
+  const s = await sessionNodes(body?.token);
+  if (s) {
+    const assets = s.nodes.map((n: any) => n.asset);
+    await db.rpc("sprout_credit", { p_assets: assets, p_gap: GAP_SECONDS });
+    await db.from("sprout_nodes").update({ last_seen: null }).in("asset", assets);
+    await db.from("sprout_sessions").delete().eq("token", body.token);
+  }
+  return reply(200, { ok: true });
 }
 
 Deno.serve(async (req) => {
@@ -174,6 +267,14 @@ Deno.serve(async (req) => {
         return await heartbeat(body);
       case "stop":
         return await stop(body);
+      case "unpair":
+        return await unpair(body);
+      case "pair-start":
+        return await pairStart(body);
+      case "pair-approve":
+        return await pairApprove(body);
+      case "pair-check":
+        return await pairCheck(body);
       default:
         return reply(400, { error: "Unknown action." });
     }

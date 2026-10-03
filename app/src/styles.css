@@ -159,6 +159,10 @@ a { color: var(--lime); }
 .node-img { border-radius: 12px; flex: 0 0 auto; }
 .node-name { min-width: 0; }
 
+.pair-code { font-family: var(--display); font-size: 40px; font-weight: 800; letter-spacing: 0.06em; color: var(--lime); }
+.orb.on { border-color: var(--good); }
+.success .orb { margin: 0 auto; }
+
 .foot { margin-top: 28px; display: flex; flex-direction: column; gap: 6px; align-items: center; text-align: center; font-size: 13px; color: var(--muted); }
 .foot a { color: var(--muted); }
 

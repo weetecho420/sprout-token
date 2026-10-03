@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sprout Node</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="testbar" class="testbar" hidden>Test mode on devnet. Earnings are not real yet.</div>
+  <header class="top">
+    <img src="../assets/icon.png" alt="" width="28" height="28">
+    <span>Sprout Node</span>
+  </header>
+
+  <!-- Not paired -->
+  <main id="v-unpaired" class="view" hidden>
+    <section class="hero">
+      <div class="orb"><img src="../assets/leaf.svg" alt="" width="56" height="56"></div>
+      <h1>Run your Grower Nodes all day</h1>
+      <p class="muted">Pair this computer with the wallet that holds your licenses. It's a one-time step with your phone.</p>
+    </section>
+    <button class="btn primary" id="b-pair">Pair this computer</button>
+    <p class="alert bad" id="m-unpaired" hidden></p>
+  </main>
+
+  <!-- Pairing -->
+  <main id="v-pairing" class="view" hidden>
+    <section class="card center">
+      <h2>Scan with your phone</h2>
+      <p class="muted small">Use your phone's camera. It opens Phantom and asks you to approve this computer.</p>
+      <div class="qr"><img id="qr" alt="Pairing QR code" width="220" height="220"></div>
+      <span class="label">Check this code matches on your phone</span>
+      <strong class="code" id="code">····-····</strong>
+      <p class="muted small" id="expires"></p>
+    </section>
+    <button class="btn ghost" id="b-copy">Copy link instead</button>
+    <button class="btn text" id="b-cancel">Cancel</button>
+  </main>
+
+  <!-- Paired -->
+  <main id="v-running" class="view" hidden>
+    <section class="card center runner" id="runner">
+      <div class="orb"><img src="../assets/leaf.svg" alt="" width="56" height="56"></div>
+      <strong class="state" id="state">Starting…</strong>
+      <span class="muted small" id="sub"></span>
+      <div class="grid2">
+        <div class="stat"><span class="label">Earned so far</span><strong id="earned">0.00</strong></div>
+        <div class="stat"><span class="label">This session</span><strong id="session">–</strong></div>
+      </div>
+      <button class="btn ghost" id="b-toggle">Pause node</button>
+    </section>
+    <p class="alert" id="m-running" hidden></p>
+
+    <section class="card">
+      <h2>Your nodes</h2>
+      <ul class="nodes" id="nodes"></ul>
+    </section>
+
+    <section class="card settings">
+      <label class="switch">
+        <input type="checkbox" id="c-login">
+        <span>Start with this computer</span>
+      </label>
+      <p class="muted small">Closing this window keeps your node running in the taskbar. It uses almost no power: one tiny check-in a minute.</p>
+      <div class="row">
+        <button class="btn text" id="b-dash">Open My Nodes</button>
+        <button class="btn text danger" id="b-unpair">Unpair</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
