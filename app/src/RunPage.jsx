@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { getMyLicenses } from './solana';
-import { startNode, heartbeat, stopNode, stageFor, nodeNetworkReady, HEARTBEAT_MS } from './node';
+import { startNode, heartbeat, stopNode, stageFor, nodeNetworkReady, HEARTBEAT_MS, DESKTOP_DOWNLOAD_URL } from './node';
 import { duration, sprout, fmt } from './format';
 import { Leaf } from './icons.jsx';
 
@@ -264,6 +264,17 @@ export default function RunPage({ sale, now }) {
             ? `Earning ${lead.perDay} $SPROUT a day per node. Reaches ${lead.next.name} (${lead.next.perDay}/day) after ${lead.next.afterDays} days online.`
             : `Top stage: ${lead.perDay} $SPROUT a day per node.`}
         </p>
+      </section>
+
+      <section className="card desktop-cta">
+        <h2 className="h-sm">Run it all day on your computer</h2>
+        <p className="muted small">
+          The Sprout Node desktop app sits in your taskbar, starts with your computer and keeps your nodes online without
+          this page open. Pair it once by scanning a code with this phone.
+        </p>
+        <a className="btn ghost" href={DESKTOP_DOWNLOAD_URL} target="_blank" rel="noopener">
+          Get the desktop app (Windows / Mac)
+        </a>
       </section>
 
       <section className="card">

@@ -1,0 +1,79 @@
+# Builds the Sprout Node desktop app for Windows and Mac and publishes it as a GitHub Release.
+# Runs automatically when desktop app changes land on main, or from the Actions tab ("Run workflow").
+# The release is named after the version in desktop/package.json (bump it for a new release).
+name: Desktop node app
+
+on:
+  push:
+    branches: [main]
+    paths: ['desktop/**', '.github/workflows/desktop-node.yml']
+  pull_request:
+    paths: ['desktop/**', '.github/workflows/desktop-node.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: --win
+          - os: macos-latest
+            target: --mac
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Build installer
+        run: npx electron-builder ${{ matrix.target }} --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false' # not code-signed yet
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sprout-node-${{ matrix.os }}
+          path: |
+            desktop/dist/*.exe
+            desktop/dist/*.dmg
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: github.event_name != 'pull_request' # pull requests only check that it builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read version
+        id: v
+        run: echo "version=$(node -p "require('./desktop/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: node-v${{ steps.v.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: Sprout Node desktop v${{ steps.v.outputs.version }}
+          make_latest: true
+          files: out/*
+          body: |
+            **Sprout Node for Windows and Mac.** Runs your Grower Nodes from the taskbar.
+
+            - **Windows:** download `Sprout-Node-Setup-….exe` and open it. Windows may say "Windows protected your PC" because the app isn't code-signed yet: click **More info → Run anyway**.
+            - **Mac:** download the `.dmg`, drag Sprout Node to Applications, then right-click it → **Open** the first time.
+
+            Then click **Pair this computer** and scan the code with your phone's camera.

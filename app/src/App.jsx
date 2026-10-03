@@ -6,12 +6,13 @@ import SalePage from './SalePage.jsx';
 import CheckoutPage from './CheckoutPage.jsx';
 import NodesPage from './NodesPage.jsx';
 import RunPage from './RunPage.jsx';
+import PairPage from './PairPage.jsx';
 import { Leaf, IconSale, IconBuy, IconNodes, IconRun } from './icons.jsx';
 
-const ROUTES = { '': 'sale', buy: 'buy', run: 'run', nodes: 'nodes' };
+const ROUTES = { '': 'sale', buy: 'buy', run: 'run', nodes: 'nodes', pair: 'pair' };
 
 function useRoute() {
-  const read = () => ROUTES[window.location.hash.replace(/^#\/?/, '')] || 'sale';
+  const read = () => ROUTES[window.location.hash.replace(/^#\/?/, '').split('?')[0]] || 'sale';
   const [route, setRoute] = useState(read);
   useEffect(() => {
     const on = () => {
@@ -94,6 +95,7 @@ export default function App() {
         {route === 'sale' && <SalePage sale={sale} now={now} />}
         {route === 'buy' && <CheckoutPage sale={sale} now={now} onBought={refresh} />}
         {route === 'run' && <RunPage sale={sale} now={now} />}
+        {route === 'pair' && <PairPage sale={sale} />}
         {route === 'nodes' && <NodesPage sale={sale} now={now} />}
       </main>
 
@@ -111,7 +113,7 @@ export default function App() {
           <IconBuy />
           Buy
         </a>
-        <a href="#/run" aria-current={route === 'run' ? 'page' : undefined}>
+        <a href="#/run" aria-current={route === 'run' || route === 'pair' ? 'page' : undefined}>
           <IconRun />
           Run Node
         </a>
