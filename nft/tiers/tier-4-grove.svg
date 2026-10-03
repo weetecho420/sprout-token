@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="70%">
+      <stop offset="0" stop-color="#2A1550"/>
+      <stop offset="0.65" stop-color="#081008"/>
+      <stop offset="1" stop-color="#050805"/>
+    </radialGradient>
+    <radialGradient id="disc" cx="50%" cy="40%" r="60%">
+      <stop offset="0" stop-color="#132016"/>
+      <stop offset="1" stop-color="#070b07"/>
+    </radialGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#B27BFF"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.85"/>
+    </linearGradient>
+    <radialGradient id="pool" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#9558F5" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#9558F5" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>
+  </defs>
+  <rect width="1000" height="1000" fill="url(#bg)"/>
+  <g stroke="#B27BFF" stroke-opacity="0.10" stroke-width="1.5"><line x1="43" y1="727" x2="76" y2="630"/><line x1="43" y1="727" x2="195" y2="612"/><line x1="628" y1="778" x2="730" y2="779"/><line x1="836" y1="247" x2="762" y2="303"/><line x1="836" y1="247" x2="848" y2="244"/><line x1="836" y1="247" x2="790" y2="203"/><line x1="836" y1="247" x2="673" y2="335"/><line x1="836" y1="247" x2="764" y2="128"/><line x1="406" y1="787" x2="240" y2="834"/><line x1="406" y1="787" x2="303" y2="746"/><line x1="762" y1="303" x2="848" y2="244"/><line x1="762" y1="303" x2="790" y2="203"/><line x1="762" y1="303" x2="673" y2="335"/><line x1="762" y1="303" x2="764" y2="128"/><line x1="240" y1="834" x2="303" y2="746"/><line x1="443" y1="417" x2="419" y2="404"/><line x1="443" y1="417" x2="328" y2="315"/><line x1="443" y1="417" x2="414" y2="501"/><line x1="443" y1="417" x2="375" y2="565"/><line x1="160" y1="120" x2="205" y2="137"/><line x1="160" y1="120" x2="264" y2="71"/><line x1="160" y1="120" x2="98" y2="42"/><line x1="160" y1="120" x2="278" y2="175"/><line x1="419" y1="404" x2="328" y2="315"/><line x1="419" y1="404" x2="414" y2="501"/><line x1="419" y1="404" x2="375" y2="565"/><line x1="205" y1="137" x2="264" y2="71"/><line x1="205" y1="137" x2="98" y2="42"/><line x1="205" y1="137" x2="278" y2="175"/><line x1="205" y1="137" x2="368" y2="41"/><line x1="328" y1="315" x2="414" y2="501"/><line x1="328" y1="315" x2="278" y2="175"/><line x1="848" y1="244" x2="790" y2="203"/><line x1="848" y1="244" x2="673" y2="335"/><line x1="848" y1="244" x2="764" y2="128"/><line x1="790" y1="203" x2="673" y2="335"/><line x1="790" y1="203" x2="764" y2="128"/><line x1="76" y1="630" x2="195" y2="612"/><line x1="264" y1="71" x2="98" y2="42"/><line x1="264" y1="71" x2="278" y2="175"/><line x1="264" y1="71" x2="368" y2="41"/><line x1="195" y1="612" x2="303" y2="746"/><line x1="195" y1="612" x2="375" y2="565"/><line x1="414" y1="501" x2="375" y2="565"/><line x1="278" y1="175" x2="368" y2="41"/><line x1="303" y1="746" x2="375" y2="565"/></g><g fill="#B27BFF" fill-opacity="0.35"><circle cx="43" cy="727" r="3.0"/><circle cx="958" cy="885" r="2.7"/><circle cx="628" cy="778" r="2.2"/><circle cx="836" cy="247" r="4.3"/><circle cx="406" cy="787" r="2.3"/><circle cx="762" cy="303" r="4.9"/><circle cx="240" cy="834" r="3.8"/><circle cx="443" cy="417" r="2.9"/><circle cx="160" cy="120" r="4.3"/><circle cx="730" cy="779" r="2.9"/><circle cx="419" cy="404" r="2.1"/><circle cx="205" cy="137" r="4.8"/><circle cx="328" cy="315" r="3.9"/><circle cx="848" cy="244" r="2.3"/><circle cx="790" cy="203" r="4.2"/><circle cx="76" cy="630" r="3.2"/><circle cx="264" cy="71" r="2.2"/><circle cx="195" cy="612" r="3.7"/><circle cx="673" cy="335" r="4.4"/><circle cx="414" cy="501" r="2.1"/><circle cx="98" cy="42" r="2.3"/><circle cx="764" cy="128" r="3.3"/><circle cx="278" cy="175" r="3.3"/><circle cx="303" cy="746" r="2.7"/><circle cx="368" cy="41" r="3.0"/><circle cx="375" cy="565" r="2.3"/></g>
+  <ellipse cx="500" cy="700" rx="250" ry="46" fill="url(#pool)"/>
+  <circle cx="500" cy="440" r="236" fill="none" stroke="#9558F5" stroke-width="18" opacity="0.55" filter="url(#soft)"/>
+  <circle cx="500" cy="440" r="228" fill="url(#disc)" stroke="#B27BFF" stroke-width="7"/>
+  <circle cx="500" cy="440" r="200" fill="none" stroke="#B27BFF" stroke-opacity="0.35" stroke-width="2"/>
+  <circle cx="500" cy="440" r="186" fill="none" stroke="#B27BFF" stroke-opacity="0.18" stroke-width="1.5" stroke-dasharray="4 10"/>
+  <path d="M500 600V290" stroke="#B27BFF" stroke-width="10" stroke-linecap="round"/><path d="M0 0C26-30 74-34 112-6C78 26 30 30 0 0Z" transform="translate(500 530) rotate(-28) scale(1.05)" fill="url(#leaf)"/><path d="M0 0C26-30 74-34 112-6C78 26 30 30 0 0Z" transform="translate(500 477) rotate(208) scale(0.98)" fill="url(#leaf)"/><path d="M0 0C26-30 74-34 112-6C78 26 30 30 0 0Z" transform="translate(500 423) rotate(-28) scale(0.91)" fill="url(#leaf)"/><path d="M0 0C26-30 74-34 112-6C78 26 30 30 0 0Z" transform="translate(500 370) rotate(208) scale(0.84)" fill="url(#leaf)"/><path d="M0 0C26-30 74-34 112-6C78 26 30 30 0 0Z" transform="translate(500 316) rotate(-28) scale(0.77)" fill="url(#leaf)"/><path d="M500 296C486 276486 256500 242C514 256514 276500 296Z" fill="#B27BFF"/>
+  <rect x="34" y="34" width="932" height="932" rx="40" fill="none" stroke="#B27BFF" stroke-opacity="0.45" stroke-width="3"/>
+  <text x="500" y="118" text-anchor="middle" font-family="DM Sans" font-weight="700" font-size="26" letter-spacing="9" fill="#E8F2E6" fill-opacity="0.85">SPROUT NETWORK</text>
+  <rect x="302" y="146" width="396" height="50" rx="25" fill="#B27BFF" fill-opacity="0.14" stroke="#B27BFF" stroke-opacity="0.6" stroke-width="2"/>
+  <text x="500" y="180" text-anchor="middle" font-family="DM Sans" font-weight="700" font-size="22" letter-spacing="6" fill="#B27BFF">TIER IV  ·  GROVE</text>
+  <text x="500" y="790" text-anchor="middle" font-family="Bricolage Grotesque" font-weight="800" font-size="84" fill="#F4F8F1">Grower Node</text>
+  <text x="500" y="850" text-anchor="middle" font-family="DM Sans" font-weight="500" font-size="28" fill="#B27BFF">Many trees. One strong network.</text>
+  <circle cx="432" cy="905" r="9" fill="#B27BFF" stroke="#B27BFF" stroke-opacity="1" stroke-width="2.5"/><circle cx="466" cy="905" r="9" fill="#B27BFF" stroke="#B27BFF" stroke-opacity="1" stroke-width="2.5"/><circle cx="500" cy="905" r="9" fill="#B27BFF" stroke="#B27BFF" stroke-opacity="1" stroke-width="2.5"/><circle cx="534" cy="905" r="9" fill="#B27BFF" stroke="#B27BFF" stroke-opacity="1" stroke-width="2.5"/><circle cx="568" cy="905" r="9" fill="none" stroke="#B27BFF" stroke-opacity="0.45" stroke-width="2.5"/>
+</svg>

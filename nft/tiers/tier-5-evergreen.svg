@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="70%">
+      <stop offset="0" stop-color="#4A3108"/>
+      <stop offset="0.65" stop-color="#081008"/>
+      <stop offset="1" stop-color="#050805"/>
+    </radialGradient>
+    <radialGradient id="disc" cx="50%" cy="40%" r="60%">
+      <stop offset="0" stop-color="#132016"/>
+      <stop offset="1" stop-color="#070b07"/>
+    </radialGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FFC94D"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.85"/>
+    </linearGradient>
+    <radialGradient id="pool" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#F5AE1F" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#F5AE1F" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>
+  </defs>
+  <rect width="1000" height="1000" fill="url(#bg)"/>
+  <g stroke="#FFC94D" stroke-opacity="0.10" stroke-width="1.5"><line x1="44" y1="505" x2="90" y2="677"/><line x1="44" y1="505" x2="63" y2="325"/><line x1="308" y1="415" x2="306" y2="479"/><line x1="308" y1="415" x2="326" y2="369"/><line x1="308" y1="415" x2="400" y2="418"/><line x1="308" y1="415" x2="353" y2="569"/><line x1="333" y1="78" x2="434" y2="109"/><line x1="333" y1="78" x2="194" y2="217"/><line x1="333" y1="78" x2="460" y2="222"/><line x1="434" y1="109" x2="460" y2="222"/><line x1="306" y1="479" x2="326" y2="369"/><line x1="306" y1="479" x2="400" y2="418"/><line x1="306" y1="479" x2="353" y2="569"/><line x1="945" y1="656" x2="775" y2="640"/><line x1="795" y1="240" x2="906" y2="304"/><line x1="795" y1="240" x2="875" y2="52"/><line x1="795" y1="240" x2="854" y2="198"/><line x1="795" y1="240" x2="785" y2="346"/><line x1="614" y1="767" x2="775" y2="640"/><line x1="614" y1="767" x2="685" y2="626"/><line x1="614" y1="767" x2="534" y2="904"/><line x1="614" y1="767" x2="550" y2="577"/><line x1="614" y1="767" x2="697" y2="878"/><line x1="254" y1="807" x2="90" y2="677"/><line x1="906" y1="304" x2="854" y2="198"/><line x1="906" y1="304" x2="785" y2="346"/><line x1="875" y1="52" x2="854" y2="198"/><line x1="326" y1="369" x2="400" y2="418"/><line x1="326" y1="369" x2="194" y2="217"/><line x1="326" y1="369" x2="353" y2="569"/><line x1="326" y1="369" x2="460" y2="222"/><line x1="400" y1="418" x2="353" y2="569"/><line x1="400" y1="418" x2="563" y2="464"/><line x1="400" y1="418" x2="460" y2="222"/><line x1="775" y1="640" x2="685" y2="626"/><line x1="194" y1="217" x2="63" y2="325"/><line x1="353" y1="569" x2="550" y2="577"/><line x1="685" y1="626" x2="563" y2="464"/><line x1="685" y1="626" x2="550" y2="577"/><line x1="563" y1="464" x2="550" y2="577"/><line x1="534" y1="904" x2="697" y2="878"/><line x1="854" y1="198" x2="785" y2="346"/></g><g fill="#FFC94D" fill-opacity="0.35"><circle cx="44" cy="505" r="3.2"/><circle cx="308" cy="415" r="4.7"/><circle cx="333" cy="78" r="4.7"/><circle cx="434" cy="109" r="4.8"/><circle cx="306" cy="479" r="2.9"/><circle cx="945" cy="656" r="2.1"/><circle cx="795" cy="240" r="4.4"/><circle cx="614" cy="767" r="2.5"/><circle cx="254" cy="807" r="3.6"/><circle cx="906" cy="304" r="2.8"/><circle cx="875" cy="52" r="2.3"/><circle cx="326" cy="369" r="4.6"/><circle cx="400" cy="418" r="3.0"/><circle cx="775" cy="640" r="2.0"/><circle cx="194" cy="217" r="3.6"/><circle cx="353" cy="569" r="2.6"/><circle cx="685" cy="626" r="5.0"/><circle cx="563" cy="464" r="4.2"/><circle cx="90" cy="677" r="3.1"/><circle cx="534" cy="904" r="2.9"/><circle cx="63" cy="325" r="5.0"/><circle cx="854" cy="198" r="2.2"/><circle cx="460" cy="222" r="4.4"/><circle cx="550" cy="577" r="2.9"/><circle cx="785" cy="346" r="3.8"/><circle cx="697" cy="878" r="4.8"/></g>
+  <ellipse cx="500" cy="700" rx="250" ry="46" fill="url(#pool)"/>
+  <circle cx="500" cy="440" r="236" fill="none" stroke="#F5AE1F" stroke-width="18" opacity="0.55" filter="url(#soft)"/>
+  <circle cx="500" cy="440" r="228" fill="url(#disc)" stroke="#FFC94D" stroke-width="7"/>
+  <circle cx="500" cy="440" r="200" fill="none" stroke="#FFC94D" stroke-opacity="0.35" stroke-width="2"/>
+  <circle cx="500" cy="440" r="186" fill="none" stroke="#FFC94D" stroke-opacity="0.18" stroke-width="1.5" stroke-dasharray="4 10"/>
+  <path d="M500 600V282" stroke="#FFC94D" stroke-width="10" stroke-linecap="round"/><path d="M0 0C26-30 74-34 112-6C78 26 30 30 0 0Z" transform="translate(500 530) rotate(-28) scale(1.05)" fill="url(#leaf)"/><path d="M0 0C26-30 74-34 112-6C78 26 30 30 0 0Z" transform="translate(500 486) rotate(208) scale(0.98)" fill="url(#leaf)"/><path d="M0 0C26-30 74-34 112-6C78 26 30 30 0 0Z" transform="translate(500 441) rotate(-28) scale(0.91)" fill="url(#leaf)"/><path d="M0 0C26-30 74-34 112-6C78 26 30 30 0 0Z" transform="translate(500 397) rotate(208) scale(0.84)" fill="url(#leaf)"/><path d="M0 0C26-30 74-34 112-6C78 26 30 30 0 0Z" transform="translate(500 352) rotate(-28) scale(0.77)" fill="url(#leaf)"/><path d="M0 0C26-30 74-34 112-6C78 26 30 30 0 0Z" transform="translate(500 308) rotate(208) scale(0.70)" fill="url(#leaf)"/><circle cx="500" cy="262" r="16" fill="#FFF3C4"/><circle cx="500" cy="262" r="30" fill="none" stroke="#FFF3C4" stroke-opacity="0.5" stroke-width="3"/>
+  <rect x="34" y="34" width="932" height="932" rx="40" fill="none" stroke="#FFC94D" stroke-opacity="0.45" stroke-width="3"/>
+  <text x="500" y="118" text-anchor="middle" font-family="DM Sans" font-weight="700" font-size="26" letter-spacing="9" fill="#E8F2E6" fill-opacity="0.85">SPROUT NETWORK</text>
+  <rect x="270.5" y="146" width="459" height="50" rx="25" fill="#FFC94D" fill-opacity="0.14" stroke="#FFC94D" stroke-opacity="0.6" stroke-width="2"/>
+  <text x="500" y="180" text-anchor="middle" font-family="DM Sans" font-weight="700" font-size="22" letter-spacing="6" fill="#FFC94D">TIER V  ·  EVERGREEN</text>
+  <text x="500" y="790" text-anchor="middle" font-family="Bricolage Grotesque" font-weight="800" font-size="84" fill="#F4F8F1">Grower Node</text>
+  <text x="500" y="850" text-anchor="middle" font-family="DM Sans" font-weight="500" font-size="28" fill="#FFC94D">Rooted for good. The rarest Grower.</text>
+  <circle cx="432" cy="905" r="9" fill="#FFC94D" stroke="#FFC94D" stroke-opacity="1" stroke-width="2.5"/><circle cx="466" cy="905" r="9" fill="#FFC94D" stroke="#FFC94D" stroke-opacity="1" stroke-width="2.5"/><circle cx="500" cy="905" r="9" fill="#FFC94D" stroke="#FFC94D" stroke-opacity="1" stroke-width="2.5"/><circle cx="534" cy="905" r="9" fill="#FFC94D" stroke="#FFC94D" stroke-opacity="1" stroke-width="2.5"/><circle cx="568" cy="905" r="9" fill="#FFC94D" stroke="#FFC94D" stroke-opacity="1" stroke-width="2.5"/>
+</svg>
