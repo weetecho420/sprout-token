@@ -9,7 +9,7 @@ A small Windows/Mac app that runs your Grower Nodes from the taskbar, so they ke
 
 ## Download
 
-Get the latest installer from the repo's **Releases** page. New builds are made by GitHub Actions when a tag like `node-v0.1.1` is pushed (or via *Actions → Desktop node app → Run workflow*).
+Get the latest installer from the repo's **Releases** page. GitHub Actions builds new installers whenever desktop changes are merged into `main` (or via *Actions → Desktop node app → Run workflow*). Bump `version` in `package.json` to publish a new release instead of updating the current one.
 
 ## Develop
 
