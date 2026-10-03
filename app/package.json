@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:mainnet-test": "node scripts/build-mainnet-test.mjs"
   },
   "dependencies": {
     "@metaplex-foundation/mpl-core": "^1.10.0",

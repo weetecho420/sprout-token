@@ -36,6 +36,19 @@ npm run setup-tiers    # creates the collection + 5 Candy Machines, prints 3 Net
 
 Put the three printed values (`VITE_COLLECTION`, `VITE_CANDY_MACHINES`, `VITE_TREASURY`) in Netlify, then redeploy. Supplies: 500 / 250 / 150 / 70 / 30 = 1,000.
 
+## Private real-money test (mainnet)
+
+Uses `.env.mainnet`, so your devnet setup is never touched.
+
+```bash
+copy .env.mainnet.example .env.mainnet   # then fill it in (PRICE_SOL=0.01, TREASURY = your Phantom)
+npm run wallet:mainnet                   # shows the deploy wallet address + real SOL balance (needs ~0.15 SOL)
+npm run upload-tiers:mainnet
+npm run setup-tiers:mainnet              # asks you to type YES
+```
+
+Send the printed `VITE_COLLECTION` and `VITE_CANDY_MACHINES` to Claude. They go in `app/mainnet-test.json`, and the private test app appears at `/mainnet-test/` (not linked anywhere, hidden from search engines).
+
 ## Sale settings (in `.env`)
 
 | Setting | Default |

@@ -5,6 +5,8 @@ const network = env.VITE_NETWORK === 'mainnet-beta' ? 'mainnet-beta' : 'devnet';
 
 export const CONFIG = {
   network,
+  // Private real-money test build (see app/mainnet-test.json). Not linked anywhere public.
+  privateTest: env.VITE_PRIVATE_TEST === '1',
   isDevnet: network === 'devnet',
   rpcUrl:
     env.VITE_RPC_URL ||

@@ -9,7 +9,11 @@
     "upload": "node --env-file=.env scripts/upload.mjs",
     "setup": "node --env-file=.env scripts/setup.mjs",
     "upload-tiers": "node --env-file=.env scripts/upload-tiers.mjs",
-    "setup-tiers": "node --env-file=.env scripts/setup-tiers.mjs"
+    "setup-tiers": "node --env-file=.env scripts/setup-tiers.mjs",
+    "wallet": "node --env-file=.env scripts/wallet.mjs",
+    "wallet:mainnet": "node --env-file=.env.mainnet scripts/wallet.mjs",
+    "upload-tiers:mainnet": "node --env-file=.env.mainnet scripts/upload-tiers.mjs",
+    "setup-tiers:mainnet": "node --env-file=.env.mainnet scripts/setup-tiers.mjs"
   },
   "dependencies": {
     "@metaplex-foundation/mpl-core": "^1.10.0",

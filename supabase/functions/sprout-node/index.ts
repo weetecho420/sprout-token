@@ -38,43 +38,52 @@ const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SE
   auth: { persistSession: false },
 });
 
-type Config = { collection: string | null; rpc_url: string };
-type License = { asset: string; name: string };
+type Network = { collection: string; network: string; rpc_url: string };
+type License = { asset: string; name: string; network: string };
 
-async function getConfig(): Promise<Config> {
-  const { data, error } = await db.from("sprout_config").select("collection, rpc_url").eq("id", 1).single();
+/** License collections the node network accepts (devnet beta, mainnet). */
+async function getNetworks(): Promise<Network[]> {
+  const { data, error } = await db.from("sprout_networks").select("collection, network, rpc_url");
   if (error) throw error;
-  return data as Config;
+  return (data ?? []) as Network[];
 }
 
-/** Reads Metaplex Core asset accounts and keeps the ones `owner` holds in our collection. */
-async function verifyLicenses(cfg: Config, owner: string, assets: string[]): Promise<License[]> {
-  if (!assets.length) return [];
-  const res = await fetch(cfg.rpc_url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: 1,
-      method: "getMultipleAccounts",
-      params: [assets, { encoding: "base64", commitment: "confirmed" }],
-    }),
-  });
-  const json = await res.json();
-  if (json.error) throw new Error(json.error.message);
-  const out: License[] = [];
-  (json.result?.value ?? []).forEach((acc: any, i: number) => {
-    if (!acc || acc.owner !== CORE_PROGRAM) return;
-    const b = Uint8Array.from(atob(acc.data[0]), (c) => c.charCodeAt(0));
-    // AssetV1 layout: key(1)=1, owner(32), update authority tag(1)=2 for Collection, collection(32), name(u32 len + utf8)
-    if (b.length < 70 || b[0] !== 1 || b[33] !== 2) return;
-    if (bs58.encode(b.slice(1, 33)) !== owner) return;
-    if (bs58.encode(b.slice(34, 66)) !== cfg.collection) return;
-    const len = new DataView(b.buffer).getUint32(66, true);
-    const name = new TextDecoder().decode(b.slice(70, 70 + Math.min(len, 64)));
-    out.push({ asset: assets[i], name });
-  });
-  return out;
+/** Reads Metaplex Core asset accounts on each network and keeps the ones `owner` holds in an accepted collection. */
+async function verifyLicenses(networks: Network[], owner: string, assets: string[]): Promise<License[]> {
+  if (!assets.length || !networks.length) return [];
+  const byRpc = new Map<string, Network[]>();
+  for (const n of networks) byRpc.set(n.rpc_url, [...(byRpc.get(n.rpc_url) ?? []), n]);
+  const found = new Map<string, License>();
+  await Promise.all(
+    [...byRpc.entries()].map(async ([rpc, nets]) => {
+      const res = await fetch(rpc, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "getMultipleAccounts",
+          params: [assets, { encoding: "base64", commitment: "confirmed" }],
+        }),
+      });
+      const json = await res.json();
+      if (json.error) throw new Error(json.error.message);
+      (json.result?.value ?? []).forEach((acc: any, i: number) => {
+        if (!acc || acc.owner !== CORE_PROGRAM) return;
+        const b = Uint8Array.from(atob(acc.data[0]), (c) => c.charCodeAt(0));
+        // AssetV1 layout: key(1)=1, owner(32), update authority tag(1)=2 for Collection, collection(32), name(u32 len + utf8)
+        if (b.length < 70 || b[0] !== 1 || b[33] !== 2) return;
+        if (bs58.encode(b.slice(1, 33)) !== owner) return;
+        const coll = bs58.encode(b.slice(34, 66));
+        const net = nets.find((n) => n.collection === coll);
+        if (!net) return;
+        const len = new DataView(b.buffer).getUint32(66, true);
+        const name = new TextDecoder().decode(b.slice(70, 70 + Math.min(len, 64)));
+        found.set(assets[i], { asset: assets[i], name, network: net.network });
+      });
+    })
+  );
+  return [...found.values()];
 }
 
 const publicNode = (n: any) => ({
@@ -110,10 +119,10 @@ async function verifySigned(body: any, kind: "sign-in" | "pairing") {
   }
   if (!ok) return { error: reply(401, { error: "The wallet signature didn't match." }) };
 
-  const cfg = await getConfig();
-  if (!cfg.collection) return { error: reply(503, { error: "The node network isn't switched on yet." }) };
+  const networks = await getNetworks();
+  if (!networks.length) return { error: reply(503, { error: "The node network isn't switched on yet." }) };
   const list = Array.isArray(assets) ? assets.filter((a) => typeof a === "string").slice(0, MAX_ASSETS) : [];
-  const licenses = await verifyLicenses(cfg, owner, list);
+  const licenses = await verifyLicenses(networks, owner, list);
   if (!licenses.length) return { error: reply(403, { error: "No Grower Node license found in this wallet." }) };
 
   const now = new Date().toISOString();
@@ -216,10 +225,16 @@ async function heartbeat(body: any) {
   let assets = s.nodes.map((n: any) => n.asset);
   const stale = s.nodes.filter((n: any) => !n.verified_at || Date.now() - Date.parse(n.verified_at) > REVERIFY_MS);
   if (stale.length) {
-    const cfg = await getConfig();
-    const still = new Set((await verifyLicenses(cfg, s.owner, stale.map((n: any) => n.asset))).map((l) => l.asset));
-    const gone = stale.filter((n: any) => !still.has(n.asset)).map((n: any) => n.asset);
-    if (still.size) {
+    let still: Set<string> | null = null;
+    try {
+      const networks = await getNetworks();
+      still = new Set((await verifyLicenses(networks, s.owner, stale.map((n: any) => n.asset))).map((l) => l.asset));
+    } catch (e) {
+      // A Solana RPC hiccup shouldn't knock nodes offline; check again on a later heartbeat.
+      console.error("re-verify skipped", e);
+    }
+    const gone = still ? stale.filter((n: any) => !still!.has(n.asset)).map((n: any) => n.asset) : [];
+    if (still?.size) {
       await db.from("sprout_nodes").update({ verified_at: new Date().toISOString() }).in("asset", [...still]);
     }
     if (gone.length) {

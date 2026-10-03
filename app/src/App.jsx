@@ -80,7 +80,13 @@ export default function App() {
     <div className="shell">
       {CONFIG.isDevnet && (
         <div className="testbar" role="note">
-          Test mode on devnet. Uses free test SOL, not real money.
+          Beta on devnet. Uses free test SOL, not real money.{' '}
+          <a href="/beta/">How to join</a>
+        </div>
+      )}
+      {CONFIG.privateTest && (
+        <div className="testbar real" role="note">
+          Private test with REAL SOL on mainnet. Don't share this link.
         </div>
       )}
       <header className="top">
