@@ -5,9 +5,10 @@ import { loadSale } from './solana';
 import SalePage from './SalePage.jsx';
 import CheckoutPage from './CheckoutPage.jsx';
 import NodesPage from './NodesPage.jsx';
-import { Leaf, IconSale, IconBuy, IconNodes } from './icons.jsx';
+import RunPage from './RunPage.jsx';
+import { Leaf, IconSale, IconBuy, IconNodes, IconRun } from './icons.jsx';
 
-const ROUTES = { '': 'sale', buy: 'buy', nodes: 'nodes' };
+const ROUTES = { '': 'sale', buy: 'buy', run: 'run', nodes: 'nodes' };
 
 function useRoute() {
   const read = () => ROUTES[window.location.hash.replace(/^#\/?/, '')] || 'sale';
@@ -92,7 +93,8 @@ export default function App() {
       <main className="main">
         {route === 'sale' && <SalePage sale={sale} now={now} />}
         {route === 'buy' && <CheckoutPage sale={sale} now={now} onBought={refresh} />}
-        {route === 'nodes' && <NodesPage sale={sale} />}
+        {route === 'run' && <RunPage sale={sale} now={now} />}
+        {route === 'nodes' && <NodesPage sale={sale} now={now} />}
       </main>
 
       <footer className="foot">
@@ -108,6 +110,10 @@ export default function App() {
         <a href="#/buy" aria-current={route === 'buy' ? 'page' : undefined}>
           <IconBuy />
           Buy
+        </a>
+        <a href="#/run" aria-current={route === 'run' ? 'page' : undefined}>
+          <IconRun />
+          Run Node
         </a>
         <a href="#/nodes" aria-current={route === 'nodes' ? 'page' : undefined}>
           <IconNodes />

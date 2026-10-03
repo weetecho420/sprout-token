@@ -1,30 +1,34 @@
 import { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { buyLicenses, friendlyError, getMintedCount } from './solana';
+import { buyLicenses, friendlyError, getMintedCounts, purchasePlan } from './solana';
 import { explorerUrl } from './config';
 import { formatDate, fmt, solText, minPerDay } from './format';
+import { tierForMachine, ORDINALS } from './tiers';
 import { IconExternal } from './icons.jsx';
 
 export default function CheckoutPage({ sale, onBought }) {
   const wallet = useWallet();
   const owner = wallet.publicKey?.toBase58();
-  const [bought, setBought] = useState(0); // licenses this wallet already has from the sale
-  const [doneCount, setDoneCount] = useState(0);
+  const [counts, setCounts] = useState([]); // licenses this wallet already bought, per sale machine
+  const [refreshKey, setRefreshKey] = useState(0);
   useEffect(() => {
     let alive = true;
-    setBought(0);
+    setCounts([]);
     if (owner && sale.configured) {
-      getMintedCount(owner, sale)
-        .then((n) => alive && setBought(n))
+      getMintedCounts(owner, sale)
+        .then((c) => alive && setCounts(c))
         .catch(() => {});
     }
     return () => {
       alive = false;
     };
-  }, [owner, sale.configured, sale.candyGuard, sale.mintLimitId, doneCount]);
-  const walletLeft = Math.max(0, sale.maxPerWallet - bought);
-  const max = Math.max(1, Math.min(walletLeft || 1, sale.remaining || sale.maxPerWallet));
+  }, [owner, sale.configured, sale.machines, refreshKey]);
+
+  const bought = counts.reduce((s, n) => s + n, 0);
+  const plan = sale.configured ? purchasePlan(sale, counts) : [];
+  const walletLeft = plan.length;
+  const max = Math.max(1, walletLeft);
   const [qty, setQty] = useState(1);
   const [agreed, setAgreed] = useState(false);
   const [busy, setBusy] = useState(null); // { i, n }
@@ -33,28 +37,32 @@ export default function CheckoutPage({ sale, onBought }) {
 
   const q = Math.min(qty, max);
   const total = q * sale.priceSol;
+  const order = plan.slice(0, q);
 
   let blocker = '';
   if (!sale.configured) blocker = "The sale isn't set up yet.";
   else if (sale.soldOut) blocker = 'All licenses are sold.';
   else if (!sale.isLive && sale.startsAt) blocker = `The sale opens ${formatDate(sale.startsAt)}.`;
   else if (!wallet.connected) blocker = 'Connect your wallet to continue.';
-  else if (walletLeft === 0) blocker = `This wallet already has the maximum of ${sale.maxPerWallet} licenses.`;
+  else if (walletLeft === 0)
+    blocker = sale.tiered
+      ? `This wallet already has every color it can get (${bought} of ${sale.maxPerWallet}).`
+      : `This wallet already has the maximum of ${sale.maxPerWallet} licenses.`;
   else if (!agreed) blocker = 'Tick the box above to continue.';
 
   async function pay() {
     setError('');
     setDone(null);
     try {
-      const minted = await buyLicenses(wallet, sale, q, (i, n) => setBusy({ i, n }));
+      const minted = await buyLicenses(wallet, sale, order, (i, n) => setBusy({ i, n }));
       setDone(minted);
-      setDoneCount((c) => c + 1);
       onBought?.();
     } catch (e) {
       console.error(e);
       setError(friendlyError(e));
     } finally {
       setBusy(null);
+      setRefreshKey((k) => k + 1);
     }
   }
 
@@ -67,14 +75,20 @@ export default function CheckoutPage({ sale, onBought }) {
             {done.length === 1 ? 'Your license is' : `Your ${done.length} licenses are`} in your wallet now.
           </p>
           <ul className="minted">
-            {done.map((m, i) => (
+            {done.map((m, i) => {
+              const t = tierForMachine(sale, m.machine);
+              return (
               <li key={m.address}>
-                <span>License {i + 1}</span>
+                <span className="tier-chip">
+                  <img src={t.image} alt="" width="40" height="40" />
+                  {sale.tiered ? `${t.name} · Tier ${t.roman}` : `License ${i + 1}`}
+                </span>
                 <a href={explorerUrl('token', m.address)} target="_blank" rel="noopener">
-                  View on Solscan <IconExternal />
+                  View <IconExternal />
                 </a>
               </li>
-            ))}
+              );
+            })}
           </ul>
           <a className="btn primary" href="#/nodes">
             See My Nodes
@@ -92,7 +106,7 @@ export default function CheckoutPage({ sale, onBought }) {
           {solText(sale.priceSol)} per node · max {sale.maxPerWallet} per wallet
           {sale.configured ? ` · ${fmt(sale.remaining)} left` : ''}
         </p>
-        {owner && sale.configured && bought > 0 && (
+        {owner && sale.configured && bought > 0 && !sale.tiered && (
           <p className="muted small">
             This wallet has {bought} of {sale.maxPerWallet}
             {walletLeft > 0 ? `, so you can buy ${walletLeft} more.` : '.'}
@@ -118,6 +132,33 @@ export default function CheckoutPage({ sale, onBought }) {
           </div>
         </div>
       </section>
+
+      {sale.tiered && order.length > 0 && (
+        <section className="card">
+          <h2 className="h-sm">{order.length === 1 ? "You'll get" : `You'll get ${order.length} colors`}</h2>
+          <ul className="tier-order">
+            {order.map((mi) => {
+              const t = tierForMachine(sale, mi);
+              return (
+                <li key={mi} style={{ '--c': t.color }}>
+                  <img src={t.image} alt={`${t.name} Grower Node`} width="72" height="72" />
+                  <div>
+                    <strong>{t.name}</strong>
+                    <span className="muted small">
+                      Your {ORDINALS[bought + order.indexOf(mi)] || 'next'} license · Tier {t.roman}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          {bought > 0 && (
+            <p className="muted small">
+              This wallet already has {bought} {bought === 1 ? 'color' : 'colors'}, so you start at {tierForMachine(sale, order[0]).name}.
+            </p>
+          )}
+        </section>
+      )}
 
       <section className="card earn">
         <span className="label">Estimated rewards to start</span>

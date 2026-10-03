@@ -9,7 +9,18 @@ export const CONFIG = {
   rpcUrl:
     env.VITE_RPC_URL ||
     (network === 'devnet' ? 'https://api.devnet.solana.com' : 'https://api.mainnet-beta.solana.com'),
-  candyMachine: env.VITE_CANDY_MACHINE || '',
+  // One Candy Machine per tier color (VITE_CANDY_MACHINES, comma-separated, Seedling first).
+  // VITE_CANDY_MACHINE still works for the original single-color sale.
+  candyMachines: (env.VITE_CANDY_MACHINES || env.VITE_CANDY_MACHINE || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+  get candyMachine() {
+    return this.candyMachines[0] || '';
+  },
+  // Sprout Node backend (Supabase). Both values are public by design.
+  supabaseUrl: env.VITE_SUPABASE_URL || 'https://dmfhvxrxkilszdrbghqh.supabase.co',
+  supabaseKey: env.VITE_SUPABASE_KEY || 'sb_publishable_xBOm_D5LW7ifZIxFuYlIgw_b_7Gtexh',
   // Shown until the Candy Machine is set up, and as a fallback
   defaults: {
     priceSol: 0.5,

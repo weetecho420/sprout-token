@@ -14,3 +14,7 @@ dist/
 
 # Built by Netlify from app/
 site/app/
+
+# Output of the tier sale scripts (per network run)
+node-sale/tier-uris.json
+node-sale/tier-sale.json

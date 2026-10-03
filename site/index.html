@@ -122,6 +122,27 @@ img,svg{max-width:100%}
 .step p{font-size:15px;color:var(--muted);line-height:1.55}
 .step .k{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--leaf)}
 
+/* TIERS */
+.lic-head img{flex:0 0 88px;width:88px;height:88px;border-radius:14px;box-shadow:0 8px 20px -10px rgba(31,61,43,.6)}
+.gt-wrap{margin-top:clamp(48px,7vw,80px);background:var(--app-bg);border-radius:32px;padding:clamp(28px,4.5vw,52px) clamp(16px,3vw,36px);display:flex;flex-direction:column;gap:clamp(24px,3.5vw,36px)}
+.gt-wrap .section-head h2{color:var(--lime)}
+.gt-wrap .section-head p{color:#B9C4B5}
+.gt-wrap .eyebrow.dark{background:#1B2A1D;color:var(--app-good)}
+.gt-row{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.gt{border:1.5px solid color-mix(in srgb,var(--c) 60%,transparent);border-radius:22px;padding:14px 14px 18px;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 12%,#0E150E),#0B100B);display:flex;flex-direction:column;gap:10px;color:var(--app-text);min-width:0}
+.gt img{width:100%;height:auto;border-radius:14px;display:block}
+.gt-tag{align-self:center;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--c);filter:brightness(1.35);border:1px solid color-mix(in srgb,var(--c) 60%,transparent);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.gt h3{font-size:19px;text-align:center;color:var(--app-text)}
+.gt-line{font-size:14px;text-align:center;color:var(--app-muted);line-height:1.45}
+.gt ul{list-style:none;margin:0;padding:10px 0 0;border-top:1px solid var(--app-line);display:flex;flex-direction:column;gap:6px;font-size:14px}
+.gt ul li{padding-left:16px;position:relative;line-height:1.4}
+.gt ul li:before{content:"";position:absolute;left:2px;top:7px;width:7px;height:7px;border-radius:50%;background:var(--c);filter:brightness(1.35)}
+.gt-sup{margin-top:auto;text-align:center;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--c);filter:brightness(1.35)}
+.gt-cta{display:flex;flex-direction:column;align-items:center;gap:10px}
+.gt-cta .small{font-size:14px;color:var(--app-muted)}
+@media (max-width:1000px) and (min-width:641px){.gt-row{grid-template-columns:repeat(6,minmax(0,1fr))}.gt{grid-column:span 2}.gt:nth-child(4){grid-column:2/span 2}}
+@media (max-width:640px){.gt-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.gt:last-child{grid-column:1/-1;justify-self:center;width:calc(50% - 5px)}.gt{padding:10px 10px 14px}.gt h3{font-size:16px}.gt-tag{font-size:9.5px;letter-spacing:.08em;padding:3px 8px}.gt ul{font-size:13px}.gt-line{font-size:13px}}
+
 /* WHAT IT DOES */
 .does{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(28px,5vw,56px);align-items:center}
 .flow{background:var(--white);border:1px solid var(--line);border-radius:24px;padding:clamp(20px,3vw,32px);display:flex;flex-direction:column;gap:14px}
@@ -308,7 +329,7 @@ footer{border-top:1px solid var(--line);padding-block:28px}
       <a href="#faq">FAQ</a>
     </nav>
     <div class="nav-cta">
-      <a href="#nodes" class="btn btn-line">Get a node</a>
+      <a href="/app/#/buy" class="btn btn-line">Buy a node</a>
       <a href="#buy" class="btn btn-ink">Buy $SPROUT</a>
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -322,7 +343,7 @@ footer{border-top:1px solid var(--line);padding-block:28px}
     <a href="#rewards">Rewards</a>
     <a href="#creators">Creators</a>
     <a href="#faq">FAQ</a>
-    <a href="#nodes" class="btn btn-leaf">Get a Grower Node</a>
+    <a href="/app/#/buy" class="btn btn-leaf">Buy a Grower Node</a>
   </div>
 </header>
 
@@ -411,43 +432,17 @@ footer{border-top:1px solid var(--line);padding-block:28px}
         <h2>Don't just hold Sprout. Help it grow, and earn while it does.</h2>
         <p>A Grower Node is a small app that keeps a piece of the Sprout network running. Your node stores and serves files for Sprout-powered websites. Every day it stays online, you earn $SPROUT, and the longer it runs, the more it earns.</p>
         <div class="btn-row">
-          <a href="#license" class="btn btn-ink">Get a Grower License</a>
-          <a href="#rewards" class="btn btn-line">See the rewards</a>
+          <a href="/app/#/buy" class="btn btn-ink">Buy a Grower Node</a>
+          <a href="#tiers" class="btn btn-line">See the 5 colors</a>
         </div>
       </div>
 
       <aside class="license" id="license" aria-label="Grower Node license details">
         <div class="lic-head">
-          <svg viewBox="0 0 1000 1000" role="img" aria-label="Grower Node License NFT artwork">  <defs>
-    <radialGradient id="glow" cx="50%" cy="44%" r="55%">
-      <stop offset="0" stop-color="#2F6B44"/>
-      <stop offset="1" stop-color="#1A3524"/>
-    </radialGradient>
-  </defs>
-  <rect width="1000" height="1000" fill="url(#glow)"/>
-  <g fill="none" stroke="#A8D4B0" stroke-opacity="0.14" stroke-width="2">
-    <circle cx="500" cy="430" r="190"/>
-    <circle cx="500" cy="430" r="250"/>
-    <circle cx="500" cy="430" r="310"/>
-    <circle cx="500" cy="430" r="370"/>
-  </g>
-  <rect x="40" y="40" width="920" height="920" rx="36" fill="none" stroke="#A8D4B0" stroke-opacity="0.45" stroke-width="3"/>
-  <text x="500" y="128" text-anchor="middle" font-family="'Work Sans','DejaVu Sans',Arial,sans-serif" font-size="30" font-weight="700" letter-spacing="10" fill="#D8ECD9">SPROUT NETWORK</text>
-  <circle cx="500" cy="430" r="150" fill="#D8ECD9"/>
-  <path d="M500 540C500 540 430 505 430 425C430 372 461 337 500 337C539 337 570 372 570 425C570 505 500 540 500 540Z" fill="#3E8450" transform="translate(-125 -112) scale(1.25)"/>
-  <g transform="translate(-125 -112) scale(1.25)" stroke="#FBF7EE" stroke-width="5" stroke-linecap="round" fill="none">
-    <path d="M500 540V392"/>
-    <path d="M500 427C500 427 461 422 461 380"/>
-    <path d="M500 462C500 462 539 457 539 414"/>
-  </g>
-  <text x="500" y="720" text-anchor="middle" font-family="'Fraunces','DejaVu Serif',Georgia,serif" font-size="86" font-weight="700" fill="#FBF7EE">Grower Node</text>
-  <text x="500" y="784" text-anchor="middle" font-family="'Work Sans','DejaVu Sans',Arial,sans-serif" font-size="32" font-weight="600" letter-spacing="12" fill="#A8D4B0">LICENSE</text>
-  <line x1="300" y1="836" x2="700" y2="836" stroke="#A8D4B0" stroke-opacity="0.4" stroke-width="2"/>
-  <text x="500" y="890" text-anchor="middle" font-family="'Work Sans','DejaVu Sans',Arial,sans-serif" font-size="26" font-weight="500" fill="#D8ECD9">Seed to Hero  ·  Limited to 1,000  ·  Solana</text>
-</svg>
+          <img src="tiers/tier-1-seedling.webp" alt="Seedling Grower Node license NFT" width="600" height="600">
           <div>
             <h3>Grower Node License</h3>
-            <p>An NFT in your wallet · 1,000 total</p>
+            <p>An NFT in your wallet · 5 colors · 1,000 total</p>
           </div>
         </div>
         <div>
@@ -459,10 +454,64 @@ footer{border-top:1px solid var(--line);padding-block:28px}
           <div><span class="label">Price</span><strong class="num">0.5 SOL</strong></div>
           <div><span class="label">Per wallet</span><strong>Max 5</strong></div>
           <div><span class="label">Sale opens</span><strong>March 2027</strong></div>
-          <div><span class="label">You receive</span><strong>License NFT</strong></div>
+          <div><span class="label">You receive</span><strong>A color NFT</strong></div>
         </div>
-        <a href="#" class="btn btn-leaf" style="width:100%">Join the node sale</a>
+        <a href="/app/#/buy" class="btn btn-leaf" style="width:100%">Buy a Grower Node</a>
       </aside>
+    </div>
+
+    <div class="gt-wrap" id="tiers">
+      <div class="section-head center">
+        <span class="eyebrow dark">Grower Node tiers</span>
+        <h2>Collect all five colors</h2>
+        <p>Your first license is a Seedling. Every license you add grows into the next color, up to five per wallet. Every color earns the same $SPROUT.</p>
+      </div>
+      <ul class="gt-row">
+        <li class="gt" style="--c:#2FBF6B">
+          <span class="gt-tag">Tier I · Seedling</span>
+          <img src="tiers/tier-1-seedling.webp" alt="Seedling Grower Node NFT" width="600" height="600" loading="lazy">
+          <h3>Your 1st license</h3>
+          <p class="gt-line">Every garden starts with one seed.</p>
+          <ul><li>Runs a Sprout Node</li><li>Grower role in the community</li></ul>
+          <span class="gt-sup">Supply 500</span>
+        </li>
+        <li class="gt" style="--c:#1BB3A6">
+          <span class="gt-tag">Tier II · Bloom</span>
+          <img src="tiers/tier-2-bloom.webp" alt="Bloom Grower Node NFT" width="600" height="600" loading="lazy">
+          <h3>Your 2nd license</h3>
+          <p class="gt-line">Roots spreading. The network grows.</p>
+          <ul><li>Everything in Seedling</li><li>Early news on updates</li></ul>
+          <span class="gt-sup">Supply 250</span>
+        </li>
+        <li class="gt" style="--c:#3D8BE8">
+          <span class="gt-tag">Tier III · Canopy</span>
+          <img src="tiers/tier-3-canopy.webp" alt="Canopy Grower Node NFT" width="600" height="600" loading="lazy">
+          <h3>Your 3rd license</h3>
+          <p class="gt-line">Reaching higher, covering more ground.</p>
+          <ul><li>Everything in Bloom</li><li>Vote on new features</li></ul>
+          <span class="gt-sup">Supply 150</span>
+        </li>
+        <li class="gt" style="--c:#8E55E6">
+          <span class="gt-tag">Tier IV · Grove</span>
+          <img src="tiers/tier-4-grove.webp" alt="Grove Grower Node NFT" width="600" height="600" loading="lazy">
+          <h3>Your 4th license</h3>
+          <p class="gt-line">Many trees. One strong network.</p>
+          <ul><li>Everything in Canopy</li><li>Name on the Growers Wall</li></ul>
+          <span class="gt-sup">Supply 70</span>
+        </li>
+        <li class="gt" style="--c:#D99A12">
+          <span class="gt-tag">Tier V · Evergreen</span>
+          <img src="tiers/tier-5-evergreen.webp" alt="Evergreen Grower Node NFT" width="600" height="600" loading="lazy">
+          <h3>Your 5th license</h3>
+          <p class="gt-line">Rooted for good. The rarest Grower.</p>
+          <ul><li>Everything in Grove</li><li>Monthly call with the team</li></ul>
+          <span class="gt-sup">Supply 30</span>
+        </li>
+      </ul>
+      <div class="gt-cta">
+        <a href="/app/#/buy" class="btn btn-leaf">Buy a Grower Node</a>
+        <span class="small">0.5 SOL each · 1,000 licenses in total</span>
+      </div>
     </div>
 
     <div class="how">
@@ -658,7 +707,7 @@ footer{border-top:1px solid var(--line);padding-block:28px}
         <p>1,000 licenses. Max 5 per wallet. Sale opens March 2027.</p>
       </div>
       <div class="btn-row">
-        <a href="#license" class="btn btn-leaf">Get a Grower License</a>
+        <a href="/app/#/buy" class="btn btn-leaf">Buy a Grower Node</a>
         <a href="https://x.com/Sproutbeginning" class="btn btn-line" target="_blank" rel="noopener">Follow on X</a>
       </div>
     </div>
