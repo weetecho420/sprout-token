@@ -25,6 +25,17 @@ npm run setup    # creates the collection and Candy Machine, prints the addresse
 
 Copy the URIs from `upload` into `.env` before running `setup`. Save the addresses `setup` prints; the website needs them.
 
+## Five-color sale (Seedling → Evergreen)
+
+Each wallet's 1st license is Seedling (green), 2nd Bloom (aqua), 3rd Canopy (blue), 4th Grove (purple), 5th Evergreen (gold).
+
+```bash
+npm run upload-tiers   # uploads the 5 tier images + metadata, saves links to tier-uris.json
+npm run setup-tiers    # creates the collection + 5 Candy Machines, prints 3 Netlify settings
+```
+
+Put the three printed values (`VITE_COLLECTION`, `VITE_CANDY_MACHINES`, `VITE_TREASURY`) in Netlify, then redeploy. Supplies: 500 / 250 / 150 / 70 / 30 = 1,000.
+
 ## Sale settings (in `.env`)
 
 | Setting | Default |

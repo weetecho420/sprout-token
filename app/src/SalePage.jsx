@@ -1,9 +1,11 @@
 import { CONFIG } from './config';
 import { countdown, formatDate, fmt, solText, minPerDay, maxPerDay } from './format';
+import { TIERS, ORDINALS } from './tiers';
 
 export default function SalePage({ sale, now }) {
   const left = sale.startsAt ? countdown(sale.startsAt - now) : null;
   const pct = sale.total ? Math.min(100, (sale.sold / sale.total) * 100) : 0;
+  const showTiers = sale.tiered || !sale.configured;
 
   return (
     <div className="stack">
@@ -23,10 +25,15 @@ export default function SalePage({ sale, now }) {
 
       <section className="card license">
         <div className="lic-top">
-          <img src={`${import.meta.env.BASE_URL}grower-node-license.png`} alt="Grower Node License NFT artwork" width="88" height="88" />
+          <img
+            src={showTiers ? TIERS[0].image : `${import.meta.env.BASE_URL}grower-node-license.png`}
+            alt="Grower Node License NFT artwork"
+            width="88"
+            height="88"
+          />
           <div>
             <h2>Grower Node License</h2>
-            <p className="muted">An NFT in your wallet · Solana</p>
+            <p className="muted">{showTiers ? 'An NFT in your wallet · 5 colors' : 'An NFT in your wallet · Solana'}</p>
           </div>
         </div>
 
@@ -82,6 +89,29 @@ export default function SalePage({ sale, now }) {
           Become a Grower
         </a>
       </section>
+
+      {showTiers && (
+        <section className="card">
+          <h2 className="h-sm">Collect all five colors</h2>
+          <p className="muted small">
+            Your first license is a Seedling. Every license you add grows into the next color, up to five. Every color earns
+            the same $SPROUT.
+          </p>
+          <ul className="tier-grid">
+            {TIERS.map((t, i) => {
+              const m = sale.tiered ? sale.machines[i] : null;
+              return (
+                <li key={t.n} style={{ '--c': t.color }}>
+                  <img src={t.image} alt={`${t.name} Grower Node`} width="200" height="200" loading="lazy" />
+                  <span className="tier-ord">{ORDINALS[i]} license</span>
+                  <strong>{t.name}</strong>
+                  <span className="muted small num">{m ? `${fmt(m.sold)} / ${fmt(m.total)}` : `Tier ${t.roman}`}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       <section className="card earn">
         <span className="label">Estimated rewards per node</span>

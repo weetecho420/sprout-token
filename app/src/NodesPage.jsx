@@ -6,6 +6,7 @@ import { getNodeStatus, isOnline, stageFor } from './node';
 import { explorerUrl } from './config';
 import { duration, sprout } from './format';
 import { IconExternal } from './icons.jsx';
+import { tierOfName } from './tiers';
 
 export default function NodesPage({ sale, now }) {
   const { publicKey } = useWallet();
@@ -117,10 +118,12 @@ export default function NodesPage({ sale, now }) {
         const st = status[n.address];
         const online = isOnline(st, now);
         const stage = stageFor(st?.uptimeSeconds || 0);
+        const tier = tierOfName(n.name);
         return (
-        <section className="card node" key={n.address}>
+        <section className="card node" key={n.address} style={{ '--c': tier.color }}>
           <div className="node-top">
-            <div>
+            <img className="node-img" src={tier.image} alt="" width="56" height="56" />
+            <div className="node-name">
               <strong>{n.name}</strong>
               <span className="muted small">
                 {stage.name} · {st ? `${duration(st.uptimeSeconds)} online · ${sprout(st.earned)} earned` : 'never run yet'}
