@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sprout Early Growers Beta</title>
+<meta name="description" content="Join the free Sprout Grower Node beta: run a node with free test SOL, collect all five colors, and help test Sprout before launch.">
+<meta property="og:title" content="Sprout Early Growers Beta">
+<meta property="og:description" content="Free beta. Run a Grower Node with test SOL and collect all five colors.">
+<meta property="og:image" content="https://sprouttoken.netlify.app/tiers/tier-1-seedling.webp">
+<link rel="icon" href="/tiers/tier-1-seedling.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Same light look as the landing page: one 760px reading column of numbered steps. */
+:root{
+  --cream:#FBF7EE;--paper:#F3EFE2;--white:#FFFFFF;
+  --ink:#1F3D2B;--ink-2:#3F5748;--muted:#5C7163;
+  --leaf:#3E8450;--mint:#D8ECD9;--line:rgba(31,61,43,.12);
+  --warn-bg:#FFF4D6;--warn:#6B4E00;
+  --display:'Fraunces',Georgia,serif;
+  --body:'Work Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);margin:0;font-weight:600;line-height:1.15;text-wrap:balance}
+p{margin:0}
+a{color:var(--leaf);font-weight:600}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--leaf);outline-offset:3px;border-radius:6px}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+
+.nav{position:sticky;top:0;z-index:5;background:rgba(251,247,238,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;min-height:62px;gap:12px}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--display);font-size:20px;font-weight:600;color:var(--ink);text-decoration:none}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 22px;border-radius:999px;font-weight:600;text-decoration:none;font-size:15px}
+.btn-leaf{background:var(--leaf);color:var(--white)}
+.btn-line{border:1.5px solid var(--ink);color:var(--ink)}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px}
+
+.hero{padding:44px 0 28px;display:flex;flex-direction:column;gap:16px}
+.eyebrow{align-self:flex-start;padding:6px 12px;border-radius:999px;background:var(--mint);color:#2C5A3D;font-size:13px;font-weight:600}
+.hero h1{font-size:clamp(34px,7vw,52px)}
+.hero p{color:var(--ink-2);font-size:clamp(16px,2vw,18px)}
+.tiers{display:flex;gap:8px;margin-top:4px}
+.tiers img{width:clamp(44px,12vw,64px);height:auto;border-radius:12px;box-shadow:0 6px 16px -10px rgba(0,0,0,.5)}
+
+.note{border-radius:16px;padding:14px 16px;background:var(--warn-bg);color:var(--warn);font-size:15px}
+.note b{color:#4a3600}
+
+.steps{list-style:none;margin:28px 0 0;padding:0;display:flex;flex-direction:column;gap:14px;counter-reset:s}
+.step{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:20px;display:grid;grid-template-columns:40px 1fr;gap:4px 14px;counter-increment:s}
+.step::before{content:counter(s);grid-row:1 / span 2;width:40px;height:40px;border-radius:50%;background:var(--ink);color:var(--cream);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:18px}
+.step > *{grid-column:2;min-width:0}
+.step h2{font-size:21px;align-self:center}
+.step p,.step li{color:var(--ink-2);font-size:15.5px}
+.step ol,.step ul{margin:6px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.step .btn{margin-top:10px;justify-self:start}
+.tip{margin-top:8px;font-size:14px;color:var(--muted)}
+.tip b{color:var(--ink-2)}
+kbd{font-family:inherit;font-weight:600;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:.95em;color:var(--ink)}
+
+.section{margin-top:40px;display:flex;flex-direction:column;gap:12px}
+.section h2{font-size:clamp(26px,4vw,32px)}
+details{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:0 18px}
+summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:600;display:flex;justify-content:space-between;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'+';font-size:20px;line-height:1;color:var(--leaf)}
+details[open] summary::after{content:'–'}
+details p{padding-bottom:16px;color:var(--ink-2);font-size:15px}
+
+.foot{margin:48px 0 36px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:8px}
+.foot a{color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Sprout home">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 28C16 28 6 24 6 14C6 8 10 4 16 4C22 4 26 8 26 14C26 24 16 28 16 28Z" fill="#3E8450"/><path d="M16 28V12" stroke="#FBF7EE" stroke-width="2" stroke-linecap="round"/><path d="M16 16C16 16 12 15 12 11" stroke="#FBF7EE" stroke-width="2" stroke-linecap="round"/></svg>
+      Sprout
+    </a>
+    <a class="btn btn-leaf" href="/app/">Open the app</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="eyebrow">Free beta · Early Growers</span>
+    <h1>Run a Grower Node before anyone else.</h1>
+    <p>Help test Sprout before launch. You'll get a Grower Node license, run it from your phone or computer, and collect the five colors, all with free test SOL.</p>
+    <div class="tiers" aria-label="The five Grower Node colors">
+      <img src="/tiers/tier-1-seedling.webp" alt="Seedling" width="64" height="64">
+      <img src="/tiers/tier-2-bloom.webp" alt="Bloom" width="64" height="64">
+      <img src="/tiers/tier-3-canopy.webp" alt="Canopy" width="64" height="64">
+      <img src="/tiers/tier-4-grove.webp" alt="Grove" width="64" height="64">
+      <img src="/tiers/tier-5-evergreen.webp" alt="Evergreen" width="64" height="64">
+    </div>
+    <p class="note"><b>No real money.</b> The beta runs on Solana devnet, a test network. Test SOL is free and has no value, and beta earnings are test points, not real $SPROUT. About 10 minutes to set up.</p>
+  </section>
+
+  <ol class="steps">
+    <li class="step">
+      <h2>Get Phantom</h2>
+      <p>Install the Phantom wallet app on your phone (iPhone or Android) and create a wallet. Write your recovery phrase on paper and never share it with anyone, including us.</p>
+      <a class="btn btn-line" href="https://phantom.app/download" target="_blank" rel="noopener">Download Phantom</a>
+    </li>
+
+    <li class="step">
+      <h2>Switch Phantom to test mode</h2>
+      <ol>
+        <li>Tap your profile picture (top left), then <kbd>Settings</kbd>.</li>
+        <li>Open <kbd>Developer Settings</kbd> and turn on <kbd>Testnet Mode</kbd>.</li>
+        <li>Under Solana, choose <kbd>Solana Devnet</kbd>.</li>
+      </ol>
+      <p class="tip"><b>Tip:</b> Phantom now says "You are currently in Testnet Mode". Turn it off later to see your real wallet again.</p>
+    </li>
+
+    <li class="step">
+      <h2>Get free test SOL</h2>
+      <ol>
+        <li>In Phantom, tap <kbd>Receive</kbd> and copy your Solana address.</li>
+        <li>Open the Solana faucet, choose <kbd>Devnet</kbd>, paste your address and pick <kbd>2.5</kbd>.</li>
+        <li>Tap <kbd>Confirm Airdrop</kbd>. The faucet asks you to sign in with a free GitHub account the first time.</li>
+      </ol>
+      <a class="btn btn-line" href="https://faucet.solana.com" target="_blank" rel="noopener">Open the faucet</a>
+      <p class="tip"><b>Tip:</b> if Phantom shows "–" instead of a balance, close and reopen Phantom. Each license costs 0.5 test SOL, so 2.5 gets you all five colors.</p>
+    </li>
+
+    <li class="step">
+      <h2>Get your first license</h2>
+      <ol>
+        <li>In Phantom, tap the <kbd>Explore</kbd> 🌐 tab and open <b>sprouttoken.netlify.app/app</b>.</li>
+        <li>Tap <kbd>Buy</kbd>, then <kbd>Select Wallet</kbd> → <kbd>Phantom</kbd> → <kbd>Connect</kbd>.</li>
+        <li>Tick the box and tap <kbd>Confirm &amp; Pay</kbd>, then approve in Phantom.</li>
+      </ol>
+      <p>Your first license is a green <b>Seedling</b>. Buy again and you get Bloom, then Canopy, Grove and gold Evergreen.</p>
+      <a class="btn btn-leaf" href="/app/#/buy">Go to Buy</a>
+    </li>
+
+    <li class="step">
+      <h2>Run your node</h2>
+      <p><b>On your phone:</b> open the <kbd>Run Node</kbd> tab, tap <kbd>Start node</kbd> and sign the free message. Keep the page open with the screen on, because phones pause pages in the background.</p>
+      <p><b>On your computer (best):</b> install the Sprout Node desktop app, click <kbd>Pair this computer</kbd> and scan the QR code with your phone camera. It then runs all day from the taskbar.</p>
+      <div class="btn-row">
+        <a class="btn btn-leaf" href="/app/#/run">Run Node</a>
+        <a class="btn btn-line" href="https://github.com/weetecho420/sprout-token/releases/latest" target="_blank" rel="noopener">Desktop app (Windows / Mac)</a>
+      </div>
+      <p class="tip"><b>Windows warning?</b> The app isn't code-signed yet, so Windows says "protected your PC". Click <kbd>More info</kbd> → <kbd>Run anyway</kbd>.</p>
+    </li>
+
+    <li class="step">
+      <h2>Show us your garden</h2>
+      <p>Open <kbd>My Nodes</kbd> to see your colors, uptime and test earnings. Post a screenshot on X and tag <a href="https://x.com/Sproutbeginning" target="_blank" rel="noopener">@Sproutbeginning</a>. Bug reports help the most.</p>
+    </li>
+  </ol>
+
+  <section class="section">
+    <h2>Questions</h2>
+    <details>
+      <summary>Is this real money?</summary>
+      <p>No. The beta runs on Solana devnet. Test SOL is free from the faucet and can't be sold or swapped. Never send real SOL to anything in the beta.</p>
+    </details>
+    <details>
+      <summary>Do beta earnings turn into real $SPROUT?</summary>
+      <p>No. Beta earnings are test points that show how the node rewards will work. They can't be claimed or withdrawn. We'd like to thank active early testers when $SPROUT launches, and we'll share the details publicly before then. Nothing is promised.</p>
+    </details>
+    <details>
+      <summary>What does the node actually do?</summary>
+      <p>Right now it proves it's online once a minute, and that's what we're testing. Storing and serving files for the Sprout network comes in a later version.</p>
+    </details>
+    <details>
+      <summary>Phantom says "Failed to simulate" when I pay</summary>
+      <p>Phantom usually hasn't loaded your test balance yet. Close the popup, close and reopen Phantom, check your balance shows, then try again. If you already own all five colors, there's nothing left to buy.</p>
+    </details>
+    <details>
+      <summary>When is the real launch?</summary>
+      <p>$SPROUT launches on 27 January 2027. The real Grower Node sale comes after that. Follow <a href="https://x.com/Sproutbeginning" target="_blank" rel="noopener">@Sproutbeginning</a> for the official link, and only trust links posted there.</p>
+    </details>
+  </section>
+
+  <footer class="foot">
+    <a href="/">← Back to sprouttoken.netlify.app</a>
+    <span>Beta software on a test network. $SPROUT is a speculative community token. Not financial advice.</span>
+  </footer>
+</main>
+</body>
+</html>

@@ -64,6 +64,12 @@ img,svg{max-width:100%}
 .mobile-menu a{display:block;padding:12px 4px;font-size:17px;font-weight:500;border-bottom:1px solid var(--line)}
 .mobile-menu .btn{margin-top:14px;width:100%}
 
+/* BETA */
+.nav-links a.nav-beta{color:var(--leaf);font-weight:600}
+.beta-pill{display:inline-flex;align-items:center;gap:10px;padding:10px 16px;border-radius:999px;background:var(--white);border:1px solid var(--line);font-size:14px;color:var(--ink-2);max-width:100%}
+.beta-pill b{color:var(--leaf)}
+.beta-pill .dot{flex:0 0 auto;width:9px;height:9px;border-radius:50%;background:#3fbf6a;box-shadow:0 0 0 4px rgba(63,191,106,.18)}
+
 /* HERO */
 .hero{padding-block:clamp(48px,8vw,96px) clamp(48px,7vw,80px)}
 .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(32px,5vw,56px);align-items:center}
@@ -327,6 +333,7 @@ footer{border-top:1px solid var(--line);padding-block:28px}
       <a href="#rewards">Rewards</a>
       <a href="#creators">Creators</a>
       <a href="#faq">FAQ</a>
+      <a href="/beta/" class="nav-beta">Beta</a>
     </nav>
     <div class="nav-cta">
       <a href="/app/#/buy" class="btn btn-line">Buy a node</a>
@@ -343,6 +350,7 @@ footer{border-top:1px solid var(--line);padding-block:28px}
     <a href="#rewards">Rewards</a>
     <a href="#creators">Creators</a>
     <a href="#faq">FAQ</a>
+    <a href="/beta/">Join the free beta</a>
     <a href="/app/#/buy" class="btn btn-leaf">Buy a Grower Node</a>
   </div>
 </header>
@@ -360,6 +368,7 @@ footer{border-top:1px solid var(--line);padding-block:28px}
         <a id="buy" href="#" class="btn btn-leaf">Buy $SPROUT</a>
         <a href="#nodes" class="btn btn-line">Run a Grower Node</a>
       </div>
+      <a href="/beta/" class="beta-pill"><span class="dot" aria-hidden="true"></span>Free Grower Node beta is live. <b>Join with test SOL →</b></a>
       <div class="facts">
         <div><span class="label">Contract</span><strong>[PASTE ON LAUNCH]</strong></div>
         <div><span class="label">Chain</span><strong>Solana</strong></div>

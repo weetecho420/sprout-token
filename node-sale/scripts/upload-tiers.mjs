@@ -9,7 +9,8 @@ import { keypairIdentity, createGenericFile } from '@metaplex-foundation/umi';
 import { TIERS } from '../../nft/tiers/make-tiers.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const OUT = path.join(here, '../tier-uris.json');
+const MAINNET = !/devnet/.test(process.env.RPC_URL || '');
+const OUT = path.join(here, MAINNET ? '../tier-uris.mainnet.json' : '../tier-uris.json');
 
 for (const k of ['RPC_URL', 'DEPLOYER_KEYPAIR']) {
   if (!process.env[k]) {
@@ -18,6 +19,7 @@ for (const k of ['RPC_URL', 'DEPLOYER_KEYPAIR']) {
   }
 }
 
+console.log(`Network: ${MAINNET ? 'MAINNET (uses a little real SOL for storage)' : 'DEVNET (test)'}\n`);
 const umi = createUmi(process.env.RPC_URL).use(irysUploader());
 const secret = JSON.parse(fs.readFileSync(process.env.DEPLOYER_KEYPAIR, 'utf8'));
 umi.use(keypairIdentity(umi.eddsa.createKeypairFromSecretKey(new Uint8Array(secret))));
@@ -60,4 +62,4 @@ result.collectionUri = await umi.uploader.uploadJson({
 });
 
 fs.writeFileSync(OUT, JSON.stringify(result, null, 2));
-console.log(`\nAll uploaded. Links saved to node-sale/tier-uris.json\nNext: npm run setup-tiers\n`);
+console.log(`\nAll uploaded. Links saved to node-sale/${path.basename(OUT)}\nNext: npm run ${MAINNET ? 'setup-tiers:mainnet' : 'setup-tiers'}\n`);

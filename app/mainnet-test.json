@@ -1,0 +1,5 @@
+{
+  "_about": "Private real-money test build, served at /mainnet-test/. Fill candyMachines after running `npm run setup-tiers:mainnet` in node-sale.",
+  "candyMachines": "",
+  "rpcUrl": "https://mainnet.helius-rpc.com/?api-key=22ecec65-591a-46a4-ab53-e1dce18ef44e"
+}

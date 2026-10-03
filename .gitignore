@@ -6,6 +6,7 @@ id.json
 .env
 .env.*
 !.env.example
+!.env.mainnet.example
 
 # Dependencies and build output
 node_modules/
@@ -18,3 +19,6 @@ site/app/
 # Output of the tier sale scripts (per network run)
 node-sale/tier-uris.json
 node-sale/tier-sale.json
+site/mainnet-test/
+node-sale/tier-uris.mainnet.json
+node-sale/tier-sale.mainnet.json

@@ -2,10 +2,21 @@
 # (the landing page at / and the app at /app/).
 [build]
   publish = "site"
-  command = "cd app && npm ci && npm run build"
+  command = "cd app && npm ci && npm run build && npm run build:mainnet-test"
 
 [build.environment]
   NODE_VERSION = "22"
+
+# Private real-money test copy (not linked publicly)
+[[redirects]]
+  from = "/mainnet-test/*"
+  to = "/mainnet-test/index.html"
+  status = 200
+
+[[headers]]
+  for = "/mainnet-test/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
 
 # The app uses #/ links, but send any deep link back to it just in case
 [[redirects]]

@@ -10,8 +10,9 @@ import { mplCore, createCollection } from '@metaplex-foundation/mpl-core';
 import { mplCandyMachine, create } from '@metaplex-foundation/mpl-core-candy-machine';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const URIS = path.join(here, '../tier-uris.json');
-const OUT = path.join(here, '../tier-sale.json');
+const MAINNET = !/devnet/.test(process.env.RPC_URL || '');
+const URIS = path.join(here, MAINNET ? '../tier-uris.mainnet.json' : '../tier-uris.json');
+const OUT = path.join(here, MAINNET ? '../tier-sale.mainnet.json' : '../tier-sale.json');
 
 const missing = ['RPC_URL', 'DEPLOYER_KEYPAIR', 'TREASURY'].filter((k) => !process.env[k]);
 if (missing.length) {
@@ -19,7 +20,7 @@ if (missing.length) {
   process.exit(1);
 }
 if (!fs.existsSync(URIS)) {
-  console.error('Run `npm run upload-tiers` first.');
+  console.error(`Run \`npm run ${MAINNET ? 'upload-tiers:mainnet' : 'upload-tiers'}\` first.`);
   process.exit(1);
 }
 const { tiers, collectionUri } = JSON.parse(fs.readFileSync(URIS, 'utf8'));
@@ -36,6 +37,17 @@ const total = tiers.reduce((s, t) => s + t.supply, 0);
 console.log(`Network: ${process.env.RPC_URL.includes('devnet') ? 'DEVNET (test)' : 'MAINNET (real money)'}`);
 console.log(`${price} SOL each · ${total} licenses in 5 colors · 1 of each color per wallet · opens ${start}`);
 console.log(`Payments go to: ${TREASURY}\n`);
+
+if (MAINNET) {
+  const { createInterface } = await import('readline/promises');
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  const ans = await rl.question('This uses REAL SOL on mainnet. Type YES to continue: ');
+  rl.close();
+  if (ans.trim() !== 'YES') {
+    console.log('Stopped. Nothing was created.');
+    process.exit(0);
+  }
+}
 
 const collection = generateSigner(umi);
 await createCollection(umi, { collection, name: 'Sprout Grower Nodes', uri: collectionUri }).sendAndConfirm(umi);
@@ -67,6 +79,10 @@ const out = {
   VITE_TREASURY: TREASURY.toString(),
 };
 fs.writeFileSync(OUT, JSON.stringify(out, null, 2));
-console.log('\nDone! Put these 3 in Netlify → Environment variables (also saved in node-sale/tier-sale.json):\n');
+console.log(
+  MAINNET
+    ? `\nDone! Send these to Claude for the private test link (also saved in node-sale/${path.basename(OUT)}):\n`
+    : '\nDone! Put these 3 in Netlify → Environment variables (also saved in node-sale/tier-sale.json):\n'
+);
 for (const [k, v] of Object.entries(out)) console.log(`${k}=${v}`);
 console.log('');
