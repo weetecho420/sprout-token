@@ -1,4 +1,4 @@
-// Manual smoke test: `xvfb-run npx electron test/smoke.electron.js`
+// Manual smoke test: `xvfb-run npx electron scripts/smoke.electron.js`
 // Starts the real app, takes a screenshot of the window and quits.
 const path = require('path');
 const { app, BrowserWindow } = require('electron');
