@@ -7,9 +7,10 @@ import CheckoutPage from './CheckoutPage.jsx';
 import NodesPage from './NodesPage.jsx';
 import RunPage from './RunPage.jsx';
 import PairPage from './PairPage.jsx';
-import { Leaf, IconSale, IconBuy, IconNodes, IconRun } from './icons.jsx';
+import LoungePage from './LoungePage.jsx';
+import { Leaf, IconSale, IconBuy, IconNodes, IconRun, IconChat } from './icons.jsx';
 
-const ROUTES = { '': 'sale', buy: 'buy', run: 'run', nodes: 'nodes', pair: 'pair' };
+const ROUTES = { '': 'sale', buy: 'buy', run: 'run', nodes: 'nodes', pair: 'pair', lounge: 'lounge' };
 
 function useRoute() {
   const read = () => ROUTES[window.location.hash.replace(/^#\/?/, '').split('?')[0]] || 'sale';
@@ -102,6 +103,7 @@ export default function App() {
         {route === 'buy' && <CheckoutPage sale={sale} now={now} onBought={refresh} />}
         {route === 'run' && <RunPage sale={sale} now={now} />}
         {route === 'pair' && <PairPage sale={sale} />}
+        {route === 'lounge' && <LoungePage sale={sale} />}
         {route === 'nodes' && <NodesPage sale={sale} now={now} />}
       </main>
 
@@ -113,7 +115,7 @@ export default function App() {
       <nav className="tabs" aria-label="Main">
         <a href="#/" aria-current={route === 'sale' ? 'page' : undefined}>
           <IconSale />
-          Node Sale
+          Sale
         </a>
         <a href="#/buy" aria-current={route === 'buy' ? 'page' : undefined}>
           <IconBuy />
@@ -121,11 +123,15 @@ export default function App() {
         </a>
         <a href="#/run" aria-current={route === 'run' || route === 'pair' ? 'page' : undefined}>
           <IconRun />
-          Run Node
+          Run
+        </a>
+        <a href="#/lounge" aria-current={route === 'lounge' ? 'page' : undefined}>
+          <IconChat />
+          Lounge
         </a>
         <a href="#/nodes" aria-current={route === 'nodes' ? 'page' : undefined}>
           <IconNodes />
-          My Nodes
+          Nodes
         </a>
       </nav>
     </div>

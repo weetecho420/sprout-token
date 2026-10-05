@@ -101,3 +101,48 @@ export async function approvePairing(wallet, code, assets) {
 
 /** Where people download the desktop node app. */
 export const DESKTOP_DOWNLOAD_URL = 'https://github.com/weetecho420/sprout-token/releases/latest';
+
+// ---------- Growers Lounge ----------
+const LOUNGE_KEY = 'sprout-lounge';
+
+export function loadLoungeSession(owner) {
+  try {
+    const s = JSON.parse(localStorage.getItem(LOUNGE_KEY) || 'null');
+    return s && s.owner === owner && s.expires > Date.now() ? s : null;
+  } catch {
+    return null;
+  }
+}
+export function saveLoungeSession(s) {
+  try {
+    if (s) localStorage.setItem(LOUNGE_KEY, JSON.stringify(s));
+    else localStorage.removeItem(LOUNGE_KEY);
+  } catch {
+    /* private mode: they'll sign in again next time */
+  }
+}
+
+/** Signs a free message to enter the Lounge (license holders only). */
+export async function loungeLogin(wallet, assets) {
+  if (!wallet.signMessage) throw new Error("This wallet can't sign messages. Try Phantom or Solflare.");
+  const owner = wallet.publicKey.toBase58();
+  const message =
+    `Sprout Lounge sign-in\n\nWallet: ${owner}\nTime: ${new Date().toISOString()}\n\n` +
+    "This only proves you hold a Grower Node license. It's free and can't move your funds.";
+  let sig;
+  try {
+    sig = await wallet.signMessage(new TextEncoder().encode(message));
+  } catch {
+    throw new Error('You cancelled in your wallet.');
+  }
+  const res = await call('lounge-login', { owner, message, signature: bs58.encode(sig), assets });
+  const session = { owner, token: res.token, admin: res.admin, expires: Date.now() + 6.5 * 86400 * 1000 };
+  saveLoungeSession(session);
+  return session;
+}
+
+export const loungeList = (token) => call('lounge-list', { token });
+export const loungeSend = (token, body) => call('lounge-send', { token, body });
+export const loungeReport = (token, id) => call('lounge-report', { token, id });
+export const loungeDelete = (token, id) => call('lounge-delete', { token, id });
+export const loungeBan = (token, owner) => call('lounge-ban', { token, owner });
