@@ -40,3 +40,9 @@ export const IconRun = () => (
     <path d="M6.3 7.3a8 8 0 1 0 11.4 0" />
   </svg>
 );
+export const IconChat = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" {...S}>
+    <path d="M4 5h16v11H9l-5 4V5z" />
+    <path d="M8 9.5h8M8 12.5h5" />
+  </svg>
+);

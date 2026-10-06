@@ -11,6 +11,14 @@
 //   pair-approve  the wallet signs a message with that code on the phone.
 //   pair-check    the app polls with its secret and collects a long-lived device session.
 //
+// Growers Lounge (group chat for license holders):
+//   lounge-login   wallet signs once; gets a 7-day chat session (chat sessions never earn).
+//   lounge-list    latest messages.
+//   lounge-send    post a message (rate limited; links and scam phrases blocked).
+//   lounge-report  3 reports from different wallets hide a message.
+//   lounge-delete  your own message, or any message if you're an admin.
+//   lounge-ban     admins only: ban a wallet and hide its messages.
+//
 // Auth is the wallet signature + session token, so verify_jwt is off.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -25,6 +33,11 @@ const DEVICE_SESSION_DAYS = 365;
 const PAIR_MINUTES = 10;
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const MAX_ASSETS = 20;
+const CHAT_SESSION_DAYS = 7;
+const CHAT_PAGE = 60;
+const CHAT_GAP_MS = 3000; // one message every 3 seconds per wallet
+const REPORTS_TO_HIDE = 3;
+const TIER_NAMES = ["Seedling", "Bloom", "Canopy", "Grove", "Evergreen"];
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -95,18 +108,19 @@ const publicNode = (n: any) => ({
 });
 
 /** Checks a signed sign-in/pairing message and the wallet's licenses. Returns licenses or an error Response. */
-async function verifySigned(body: any, kind: "sign-in" | "pairing") {
+async function verifySigned(body: any, kind: "sign-in" | "pairing" | "lounge") {
   const { owner, message, signature, assets } = body ?? {};
   if (typeof owner !== "string" || typeof message !== "string" || typeof signature !== "string") {
     return { error: reply(400, { error: "Missing sign-in details." }) };
   }
-  const re =
-    kind === "sign-in"
-      ? /^Sprout Node sign-in\n\nWallet: (\S+)\nTime: (\S+)\n/
-      : /^Sprout Node pairing\n\nWallet: (\S+)\nCode: (\S+)\nTime: (\S+)\n/;
+  const re = {
+    "sign-in": /^Sprout Node sign-in\n\nWallet: (\S+)\nTime: (\S+)\n/,
+    lounge: /^Sprout Lounge sign-in\n\nWallet: (\S+)\nTime: (\S+)\n/,
+    pairing: /^Sprout Node pairing\n\nWallet: (\S+)\nCode: (\S+)\nTime: (\S+)\n/,
+  }[kind];
   const m = re.exec(message);
   if (!m || m[1] !== owner) return { error: reply(400, { error: "That message isn't valid." }) };
-  const time = kind === "sign-in" ? m[2] : m[3];
+  const time = kind === "pairing" ? m[3] : m[2];
   const age = Math.abs(Date.now() - Date.parse(time));
   if (!(age < 5 * 60 * 1000)) {
     return { error: reply(400, { error: "That signature expired. Check your phone's clock and try again." }) };
@@ -133,8 +147,13 @@ async function verifySigned(body: any, kind: "sign-in" | "pairing") {
   return { owner: owner as string, licenses, code: kind === "pairing" ? m[2] : null };
 }
 
-async function newSession(owner: string, kind: "web" | "device", device: string | null = null) {
-  const ms = kind === "web" ? SESSION_HOURS * 3600 * 1000 : DEVICE_SESSION_DAYS * 86400 * 1000;
+async function newSession(owner: string, kind: "web" | "device" | "chat", device: string | null = null) {
+  const ms =
+    kind === "web"
+      ? SESSION_HOURS * 3600 * 1000
+      : kind === "chat"
+        ? CHAT_SESSION_DAYS * 86400 * 1000
+        : DEVICE_SESSION_DAYS * 86400 * 1000;
   await db.from("sprout_sessions").delete().lt("expires_at", new Date().toISOString());
   const { data, error } = await db
     .from("sprout_sessions")
@@ -219,7 +238,7 @@ async function sessionNodes(token: unknown) {
 
 async function heartbeat(body: any) {
   const s = await sessionNodes(body?.token);
-  if (!s) return reply(401, { error: "Your node session ended. Start the node again." });
+  if (!s || s.kind === "chat") return reply(401, { error: "Your node session ended. Start the node again." });
 
   // Licenses can be sold; re-check ownership now and then and drop any that moved.
   let assets = s.nodes.map((n: any) => n.asset);
@@ -270,6 +289,154 @@ async function unpair(body: any) {
   return reply(200, { ok: true });
 }
 
+// ---------------- Growers Lounge ----------------
+
+const LINK_RE =
+  /(https?:\/\/|www\.|t\.me\/|discord\.(gg|com)|\b[a-z0-9-]+\.(com|io|xyz|app|net|org|gg|me|link|site|online|finance|fi|co|to|ly|cc|vip|top|pro|live|club)\b)/i;
+const SCAM_RE =
+  /(seed\s*phrase|recovery\s*phrase|secret\s*(recovery\s*)?phrase|private\s*key|(12|24)\s*words|dm\s*me|inbox\s*me|message\s*me\s*privately|wallet\s*(validat|sync|rectif|connect\s*here)|claim\s*(your\s*)?(airdrop|reward)|send\s*\d*\s*sol\s*(to|and))/i;
+
+/** Returns why a message isn't allowed, or null. Admins can post links and safety warnings. */
+function chatProblem(body: string, admin: boolean): string | null {
+  if (admin) return null;
+  if (SCAM_RE.test(body)) return "That message looks like a common crypto scam phrase, so it wasn't posted.";
+  if (LINK_RE.test(body.replace(/sprouttoken\.netlify\.app\S*/gi, ""))) {
+    return "Links aren't allowed in the Lounge (except sprouttoken.netlify.app). It keeps everyone safe from scam sites.";
+  }
+  return null;
+}
+
+async function adminLabel(owner: string) {
+  const { data } = await db.from("sprout_admins").select("label").eq("owner", owner).maybeSingle();
+  return data?.label ?? null;
+}
+
+async function isBanned(owner: string) {
+  const { data } = await db.from("sprout_chat_bans").select("owner").eq("owner", owner).maybeSingle();
+  return !!data;
+}
+
+/** Highest tier (1–5) among the wallet's licenses, from their names. */
+async function bestTier(owner: string) {
+  const { data } = await db.from("sprout_nodes").select("name").eq("owner", owner);
+  let best = 0;
+  for (const n of data ?? []) {
+    const i = TIER_NAMES.findIndex((t) => (n.name || "").includes(t));
+    if (i + 1 > best) best = i + 1;
+  }
+  return best;
+}
+
+async function chatSession(token: unknown) {
+  if (typeof token !== "string" || !/^[0-9a-f-]{36}$/i.test(token)) return null;
+  const { data: s } = await db.from("sprout_sessions").select("owner, expires_at").eq("token", token).maybeSingle();
+  if (!s || Date.parse(s.expires_at) < Date.now()) return null;
+  return s.owner as string;
+}
+
+async function loungeLogin(body: any) {
+  const v = await verifySigned(body, "lounge");
+  if ("error" in v) return v.error;
+  if (await isBanned(v.owner)) return reply(403, { error: "This wallet can't use the Lounge." });
+  const token = await newSession(v.owner, "chat");
+  const label = await adminLabel(v.owner);
+  return reply(200, { token, owner: v.owner, admin: !!label });
+}
+
+async function loungeList(body: any) {
+  const owner = await chatSession(body?.token);
+  if (!owner) return reply(401, { error: "Please enter the Lounge again." });
+  if (await isBanned(owner)) return reply(403, { error: "This wallet can't use the Lounge." });
+  const [{ data: rows }, { data: admins }] = await Promise.all([
+    db
+      .from("sprout_chat_messages")
+      .select("id, owner, body, tier, official, created_at")
+      .eq("hidden", false)
+      .order("id", { ascending: false })
+      .limit(CHAT_PAGE),
+    db.from("sprout_admins").select("owner, label"),
+  ]);
+  const labels = new Map((admins ?? []).map((a: any) => [a.owner, a.label]));
+  const messages = (rows ?? []).reverse().map((r: any) => ({
+    id: r.id,
+    owner: r.owner,
+    body: r.body,
+    tier: r.tier,
+    official: r.official,
+    label: r.official ? labels.get(r.owner) ?? null : null,
+    at: r.created_at,
+    mine: r.owner === owner,
+  }));
+  return reply(200, { messages, admin: labels.has(owner) });
+}
+
+async function loungeSend(body: any) {
+  const owner = await chatSession(body?.token);
+  if (!owner) return reply(401, { error: "Please enter the Lounge again." });
+  if (await isBanned(owner)) return reply(403, { error: "This wallet can't use the Lounge." });
+  const text = typeof body?.body === "string" ? body.body.replace(/\s+$/g, "").replace(/^\s+/g, "") : "";
+  if (!text) return reply(400, { error: "Write something first." });
+  if (text.length > 500) return reply(400, { error: "Keep it under 500 characters." });
+  const label = await adminLabel(owner);
+  const problem = chatProblem(text, !!label);
+  if (problem) return reply(422, { error: problem });
+
+  const { data: last } = await db
+    .from("sprout_chat_messages")
+    .select("created_at")
+    .eq("owner", owner)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (last && Date.now() - Date.parse(last.created_at) < CHAT_GAP_MS) {
+    return reply(429, { error: "Slow down a little, one message every few seconds." });
+  }
+  const { error } = await db
+    .from("sprout_chat_messages")
+    .insert({ owner, body: text, tier: await bestTier(owner), official: !!label });
+  if (error) throw error;
+  return loungeList(body);
+}
+
+async function loungeReport(body: any) {
+  const owner = await chatSession(body?.token);
+  if (!owner) return reply(401, { error: "Please enter the Lounge again." });
+  const id = Number(body?.id);
+  if (!Number.isInteger(id)) return reply(400, { error: "Missing message." });
+  await db.from("sprout_chat_reports").upsert({ message_id: id, reporter: owner }, { onConflict: "message_id,reporter" });
+  const { count } = await db
+    .from("sprout_chat_reports")
+    .select("*", { count: "exact", head: true })
+    .eq("message_id", id);
+  if ((count ?? 0) >= REPORTS_TO_HIDE) {
+    await db.from("sprout_chat_messages").update({ hidden: true }).eq("id", id).eq("official", false);
+  }
+  return reply(200, { ok: true });
+}
+
+async function loungeDelete(body: any) {
+  const owner = await chatSession(body?.token);
+  if (!owner) return reply(401, { error: "Please enter the Lounge again." });
+  const id = Number(body?.id);
+  if (!Number.isInteger(id)) return reply(400, { error: "Missing message." });
+  const admin = !!(await adminLabel(owner));
+  let q = db.from("sprout_chat_messages").update({ hidden: true }).eq("id", id);
+  if (!admin) q = q.eq("owner", owner);
+  await q;
+  return loungeList(body);
+}
+
+async function loungeBan(body: any) {
+  const owner = await chatSession(body?.token);
+  if (!owner || !(await adminLabel(owner))) return reply(403, { error: "Only the Sprout team can ban." });
+  const target = typeof body?.owner === "string" ? body.owner : "";
+  if (!target || (await adminLabel(target))) return reply(400, { error: "Can't ban that wallet." });
+  await db.from("sprout_chat_bans").upsert({ owner: target, banned_by: owner }, { onConflict: "owner" });
+  await db.from("sprout_chat_messages").update({ hidden: true }).eq("owner", target);
+  await db.from("sprout_sessions").delete().eq("owner", target).eq("kind", "chat");
+  return loungeList(body);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return reply(405, { error: "Use POST." });
@@ -290,6 +457,18 @@ Deno.serve(async (req) => {
         return await pairApprove(body);
       case "pair-check":
         return await pairCheck(body);
+      case "lounge-login":
+        return await loungeLogin(body);
+      case "lounge-list":
+        return await loungeList(body);
+      case "lounge-send":
+        return await loungeSend(body);
+      case "lounge-report":
+        return await loungeReport(body);
+      case "lounge-delete":
+        return await loungeDelete(body);
+      case "lounge-ban":
+        return await loungeBan(body);
       default:
         return reply(400, { error: "Unknown action." });
     }
