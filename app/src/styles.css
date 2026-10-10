@@ -206,3 +206,43 @@ a { color: var(--lime); }
   .shell { padding-top: 12px; }
   .tabs { bottom: 16px; border: 1px solid var(--line); border-radius: 24px; }
 }
+
+/* ---------- Sprout Pay (#/pay) ---------- */
+.shell-pay { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
+.pay-form label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.pay-form input, .pay-form select { min-height: 50px; padding: 0 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--bg); color: var(--text); font: 500 16px var(--body); }
+.pay-form input:focus, .pay-form select:focus { border-color: var(--lime); outline: none; }
+.pay-form .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; }
+.pay-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.pay-head-actions { display: flex; }
+.pay-amount { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 18px 0 6px; text-align: center; }
+.pay-amount strong { font: 800 clamp(44px, 14vw, 64px)/1.05 var(--display); color: var(--lime); word-break: break-all; }
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.keypad button { min-height: 62px; border-radius: 18px; border: 1px solid var(--line); background: var(--card); color: var(--text); font: 700 26px var(--display); cursor: pointer; touch-action: manipulation; }
+.keypad button:active { background: var(--card-2); transform: scale(0.97); }
+.pay-test { background: #2b2410; color: #f2d58a; text-align: center; }
+.pay-total { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; padding-top: 6px; }
+.pay-total strong { font: 800 44px/1.1 var(--display); color: var(--lime); }
+.pay-qr { align-self: center; width: min(320px, 82vw); aspect-ratio: 1; padding: 14px; border-radius: 24px; background: #fff; box-shadow: 0 0 0 6px rgba(198, 242, 107, 0.25); }
+.pay-qr img, .pay-qr-blank { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.pay-wait { display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; color: var(--good); }
+.pay-wait .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--good); animation: pay-pulse 1.2s ease-in-out infinite; }
+@keyframes pay-pulse { 50% { opacity: 0.25; transform: scale(0.7); } }
+.pay-done { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 36px 0 12px; text-align: center; }
+.pay-done strong { font: 800 40px var(--display); }
+.pay-check { width: 96px; height: 96px; border-radius: 50%; background: var(--lime); color: var(--bg); display: grid; place-items: center; font: 800 54px var(--display); animation: pay-pop 0.35s ease-out; }
+@keyframes pay-pop { from { transform: scale(0.5); opacity: 0; } }
+.pay-history ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.pay-history li { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.sign { background: #fff; color: #0c100c; border-radius: 22px; padding: 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.sign-brand { font: 800 15px var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: #2f7a3a; }
+.sign h2 { font: 800 30px/1.1 var(--display); }
+.sign img { width: min(300px, 70vw); height: auto; image-rendering: pixelated; }
+.sign ol { margin: 0; padding-left: 22px; text-align: left; font-size: 16px; font-weight: 600; }
+.sign-addr { font: 500 13px ui-monospace, monospace; color: #5b665a; }
+@media print {
+  body * { visibility: hidden; }
+  #counter-sign, #counter-sign * { visibility: visible; }
+  #counter-sign { position: absolute; inset: 0; border-radius: 0; justify-content: center; }
+  #counter-sign img { width: 70%; }
+}

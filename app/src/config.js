@@ -38,6 +38,10 @@ export const CONFIG = {
     { name: 'Hero', perDay: 200, afterDays: 90 },
   ],
   siteUrl: '/',
+  // Pay with Sprout (#/pay). Until $SPROUT launches there is no mint, so the page takes
+  // test SOL on this app's network instead. Set VITE_SPROUT_MINT after launch.
+  sproutMint: env.VITE_SPROUT_MINT || '',
+  sproutDecimals: Number(env.VITE_SPROUT_DECIMALS || 6),
 };
 
 export function explorerUrl(kind, id) {
