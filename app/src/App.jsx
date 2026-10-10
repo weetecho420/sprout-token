@@ -8,9 +8,10 @@ import NodesPage from './NodesPage.jsx';
 import RunPage from './RunPage.jsx';
 import PairPage from './PairPage.jsx';
 import LoungePage from './LoungePage.jsx';
+import PayPage from './PayPage.jsx';
 import { Leaf, IconSale, IconBuy, IconNodes, IconRun, IconChat } from './icons.jsx';
 
-const ROUTES = { '': 'sale', buy: 'buy', run: 'run', nodes: 'nodes', pair: 'pair', lounge: 'lounge' };
+const ROUTES = { '': 'sale', buy: 'buy', run: 'run', nodes: 'nodes', pair: 'pair', lounge: 'lounge', pay: 'pay' };
 
 function useRoute() {
   const read = () => ROUTES[window.location.hash.replace(/^#\/?/, '').split('?')[0]] || 'sale';
@@ -78,7 +79,7 @@ export default function App() {
   }, [chain, now]);
 
   return (
-    <div className="shell">
+    <div className={`shell ${route === 'pay' ? 'shell-pay' : ''}`}>
       {CONFIG.isDevnet && (
         <div className="testbar" role="note">
           Beta on devnet. Uses free test SOL, not real money.{' '}
@@ -93,9 +94,9 @@ export default function App() {
       <header className="top">
         <a href="#/" className="brand" aria-label="Node Sale home">
           <Leaf size={28} />
-          <span>Node Sale</span>
+          <span>{route === 'pay' ? 'Sprout Pay' : 'Node Sale'}</span>
         </a>
-        <WalletMultiButton />
+        {route !== 'pay' && <WalletMultiButton />}
       </header>
 
       <main className="main">
@@ -105,13 +106,17 @@ export default function App() {
         {route === 'pair' && <PairPage sale={sale} />}
         {route === 'lounge' && <LoungePage sale={sale} />}
         {route === 'nodes' && <NodesPage sale={sale} now={now} />}
+        {route === 'pay' && <PayPage />}
       </main>
 
+      {route !== 'pay' && (
       <footer className="foot">
         <a href={CONFIG.siteUrl}>Back to sprouttoken.netlify.app</a>
         <span>Rewards are estimates, not guaranteed. Not financial advice.</span>
       </footer>
+      )}
 
+      {route !== 'pay' && (
       <nav className="tabs" aria-label="Main">
         <a href="#/" aria-current={route === 'sale' ? 'page' : undefined}>
           <IconSale />
@@ -134,6 +139,7 @@ export default function App() {
           Nodes
         </a>
       </nav>
+      )}
     </div>
   );
 }
