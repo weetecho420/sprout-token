@@ -11,6 +11,8 @@ import {
   safeFetchMintCounterFromSeeds,
 } from '@metaplex-foundation/mpl-core-candy-machine';
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
+import { toWeb3JsTransaction } from '@metaplex-foundation/umi-web3js-adapters';
+import { Connection, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { CONFIG } from './config';
 
 function makeUmi(wallet) {
@@ -100,9 +102,28 @@ export function purchasePlan(sale, counts = []) {
   return plan;
 }
 
-/** Mints one license per entry in `plan` (machine indexes), one transaction each. */
+// Room for network fees and the license's rent on top of the price.
+const FEE_ROOM_SOL = 0.01;
+
+/**
+ * Mints one license per entry in `plan` (machine indexes), one transaction each.
+ * Sends with the wallet's own sign-and-send (Phantom's preferred path) rather than
+ * sign-then-send-ourselves, and checks the balance first so a wallet with no SOL gets a
+ * clear message here instead of a failed simulation in the wallet.
+ */
 export async function buyLicenses(wallet, sale, plan, onProgress) {
   const umi = makeUmi(wallet);
+  const connection = new Connection(CONFIG.rpcUrl, 'confirmed');
+
+  const needSol = plan.reduce((sum, i) => sum + sale.machines[i].priceSol, 0) + FEE_ROOM_SOL * plan.length;
+  const haveSol = (await connection.getBalance(wallet.publicKey, 'confirmed')) / LAMPORTS_PER_SOL;
+  if (haveSol < needSol) {
+    const err = new Error('insufficient');
+    err.needSol = needSol;
+    err.haveSol = haveSol;
+    throw err;
+  }
+
   const minted = [];
   for (let i = 0; i < plan.length; i++) {
     onProgress?.(i + 1, plan.length);
@@ -111,7 +132,7 @@ export async function buyLicenses(wallet, sale, plan, onProgress) {
     const mintArgs = {};
     if (m.treasury) mintArgs.solPayment = some({ destination: publicKey(m.treasury) });
     if (m.mintLimitId !== null) mintArgs.mintLimit = some({ id: m.mintLimitId });
-    const { signature } = await transactionBuilder()
+    const builder = await transactionBuilder()
       .add(setComputeUnitLimit(umi, { units: 800_000 }))
       .add(
         mintV1(umi, {
@@ -121,7 +142,13 @@ export async function buyLicenses(wallet, sale, plan, onProgress) {
           mintArgs,
         })
       )
-      .sendAndConfirm(umi, { confirm: { commitment: 'confirmed' } });
+      .setLatestBlockhash(umi);
+    const { blockhash, lastValidBlockHeight } = builder.options.blockhash;
+    // The new license's key signs first; the wallet adds its signature and sends.
+    const tx = toWeb3JsTransaction(await asset.signTransaction(builder.build(umi)));
+    const signature = await wallet.sendTransaction(tx, connection);
+    const res = await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, 'confirmed');
+    if (res.value.err) throw new Error(`Transaction failed: ${JSON.stringify(res.value.err)}`);
     minted.push({ address: asset.publicKey.toString(), signature, machine: plan[i] });
   }
   return minted;
@@ -151,6 +178,10 @@ export async function getMyLicenses(owner, collection) {
 export function friendlyError(err) {
   const msg = String(err?.message || err || '');
   if (/rejected|declined|cancel/i.test(msg)) return 'You cancelled the payment in your wallet. Nothing was charged.';
+  if (err?.needSol)
+    return `Your wallet has ${err.haveSol.toFixed(3)} SOL but this needs about ${err.needSol.toFixed(3)} SOL.${
+      CONFIG.isDevnet ? ' Get free test SOL at faucet.solana.com (choose Devnet), then try again.' : ' Top it up and try again.'
+    }`;
   if (/insufficient|0x1\b|Attempt to debit/i.test(msg)) return "Your wallet doesn't have enough SOL for this. Top it up and try again.";
   if (/MintNotLive|StartDate|not live/i.test(msg)) return "The sale hasn't opened yet. Check back when the countdown hits zero.";
   if (/MintLimit|maximum/i.test(msg)) return "You've reached the maximum licenses for one wallet.";
