@@ -85,7 +85,7 @@ function Setup({ initial, onSave, onCancel }) {
       >
         <label>
           <span>Shop name</span>
-          <input value={name} onChange={(e) => setName(e.target.value.slice(0, 40))} placeholder="e.g. XERA SUNNYDAY Store" required />
+          <input value={name} onChange={(e) => setName(e.target.value.slice(0, 40))} placeholder="e.g. Green Leaf Café" required />
         </label>
         <label>
           <span>Wallet that receives payments</span>
