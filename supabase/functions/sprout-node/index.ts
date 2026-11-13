@@ -19,6 +19,10 @@
 //   lounge-delete  your own message, or any message if you're an admin.
 //   lounge-ban     admins only: ban a wallet and hide its messages.
 //
+// Sale list + Early Grower badge (free; no license needed):
+//   waitlist-join    wallet signs a message to join the list for the real sale (optional X handle).
+//   waitlist-status  public: is this wallet on the list, its beta uptime, badge, and list totals.
+//
 // Auth is the wallet signature + session token, so verify_jwt is off.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -37,6 +41,7 @@ const CHAT_SESSION_DAYS = 7;
 const CHAT_PAGE = 60;
 const CHAT_GAP_MS = 3000; // one message every 3 seconds per wallet
 const REPORTS_TO_HIDE = 3;
+const EARLY_SECONDS = 24 * 3600; // beta uptime that earns the Early Grower badge
 const TIER_NAMES = ["Seedling", "Bloom", "Canopy", "Grove", "Evergreen"];
 
 const cors = {
@@ -437,6 +442,67 @@ async function loungeBan(body: any) {
   return loungeList(body);
 }
 
+// ---------------- Sale list + Early Grower ----------------
+
+const WAITLIST_RE = /^Sprout sale list\n\nWallet: (\S+)\nTime: (\S+)\n/;
+
+async function waitlistStatus(owner: string) {
+  const [{ data: row }, { data: nodes }, { data: stats }] = await Promise.all([
+    db.from("sprout_waitlist").select("owner").eq("owner", owner).maybeSingle(),
+    db.from("sprout_nodes").select("uptime_seconds").eq("owner", owner),
+    db.rpc("sprout_waitlist_stats"),
+  ]);
+  const uptime = (nodes ?? []).reduce((s: number, n: any) => s + Number(n.uptime_seconds || 0), 0);
+  return {
+    joined: !!row,
+    uptimeSeconds: uptime,
+    early: !!row && uptime >= EARLY_SECONDS,
+    earlySeconds: EARLY_SECONDS,
+    total: Number(stats?.total ?? 0),
+    earlyTotal: Number(stats?.early ?? 0),
+  };
+}
+
+async function waitlistJoin(body: any) {
+  const { owner, message, signature } = body ?? {};
+  if (typeof owner !== "string" || typeof message !== "string" || typeof signature !== "string") {
+    return reply(400, { error: "Missing sign-in details." });
+  }
+  const m = WAITLIST_RE.exec(message);
+  if (!m || m[1] !== owner) return reply(400, { error: "That message isn't valid." });
+  if (!(Math.abs(Date.now() - Date.parse(m[2])) < 5 * 60 * 1000)) {
+    return reply(400, { error: "That signature expired. Check your phone's clock and try again." });
+  }
+  let ok = false;
+  try {
+    ok = nacl.sign.detached.verify(new TextEncoder().encode(message), bs58.decode(signature), bs58.decode(owner));
+  } catch {
+    ok = false;
+  }
+  if (!ok) return reply(401, { error: "The wallet signature didn't match." });
+
+  let x: string | null = null;
+  if (typeof body?.x === "string" && body.x.trim()) {
+    const h = body.x.trim().replace(/^@/, "");
+    if (!/^[A-Za-z0-9_]{1,15}$/.test(h)) return reply(400, { error: "That X handle doesn't look right." });
+    x = h;
+  }
+  const row: Record<string, unknown> = { owner };
+  if (x) row.x_handle = x;
+  const { error } = await db.from("sprout_waitlist").upsert(row, { onConflict: "owner" });
+  if (error) throw error;
+  return reply(200, await waitlistStatus(owner));
+}
+
+async function waitlistCheck(body: any) {
+  const owner = typeof body?.owner === "string" ? body.owner : "";
+  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(owner)) {
+    const { data: stats } = await db.rpc("sprout_waitlist_stats");
+    return reply(200, { joined: false, uptimeSeconds: 0, early: false, earlySeconds: EARLY_SECONDS, total: Number(stats?.total ?? 0), earlyTotal: Number(stats?.early ?? 0) });
+  }
+  return reply(200, await waitlistStatus(owner));
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return reply(405, { error: "Use POST." });
@@ -469,6 +535,10 @@ Deno.serve(async (req) => {
         return await loungeDelete(body);
       case "lounge-ban":
         return await loungeBan(body);
+      case "waitlist-join":
+        return await waitlistJoin(body);
+      case "waitlist-status":
+        return await waitlistCheck(body);
       default:
         return reply(400, { error: "Unknown action." });
     }

@@ -146,3 +146,24 @@ export const loungeSend = (token, body) => call('lounge-send', { token, body });
 export const loungeReport = (token, id) => call('lounge-report', { token, id });
 export const loungeDelete = (token, id) => call('lounge-delete', { token, id });
 export const loungeBan = (token, owner) => call('lounge-ban', { token, owner });
+
+// ---------- Sale list + Early Grower ----------
+
+/** Public: is this wallet on the sale list, its beta uptime, badge, and list totals. */
+export const waitlistStatus = (owner) => call('waitlist-status', owner ? { owner } : {});
+
+/** Signs a free message to join the list for the real Grower Node sale. */
+export async function joinWaitlist(wallet, x) {
+  if (!wallet.signMessage) throw new Error("This wallet can't sign messages. Try Phantom or Solflare.");
+  const owner = wallet.publicKey.toBase58();
+  const message =
+    `Sprout sale list\n\nWallet: ${owner}\nTime: ${new Date().toISOString()}\n\n` +
+    "This adds your wallet to the list for the Grower Node sale. It's free and can't move your funds.";
+  let sig;
+  try {
+    sig = await wallet.signMessage(new TextEncoder().encode(message));
+  } catch {
+    throw new Error('You cancelled in your wallet. Nothing happened.');
+  }
+  return call('waitlist-join', { owner, message, signature: bs58.encode(sig), x: x || undefined });
+}
