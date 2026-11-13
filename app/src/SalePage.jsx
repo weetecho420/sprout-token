@@ -13,10 +13,20 @@ export default function SalePage({ sale, now }) {
         <span className="eyebrow">Seed → Hero</span>
         <h1>Grow the Sprout Network</h1>
         <p>
-          Run a Grower Node that stores and serves files for the Sprout network, and earn $SPROUT every day it stays
-          online.
+          Run a Grower Node, keep it online, and grow it from Seed to Hero.
+          {CONFIG.isDevnet && ' The free beta uses test SOL. The real sale opens after $SPROUT launches.'}
         </p>
       </section>
+
+      <a className="card early-cta" href="#/early">
+        <span className="early-medal" aria-hidden="true">🌱</span>
+        <span>
+          <strong>Join the Grower list, free</strong>
+          <br />
+          <span className="muted small">Get the Early Grower badge and first access to the real sale.</span>
+        </span>
+        <span className="arrow" aria-hidden="true">→</span>
+      </a>
 
       {sale.error && <p className="alert bad">{sale.error}</p>}
       {!sale.configured && !sale.loading && !sale.error && (
@@ -86,7 +96,7 @@ export default function SalePage({ sale, now }) {
         ) : null}
 
         <a className="btn primary" href="#/buy">
-          Become a Grower
+          {CONFIG.isDevnet ? 'Get a free beta node' : 'Become a Grower'}
         </a>
       </section>
 

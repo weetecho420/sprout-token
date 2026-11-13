@@ -9,9 +9,10 @@ import RunPage from './RunPage.jsx';
 import PairPage from './PairPage.jsx';
 import LoungePage from './LoungePage.jsx';
 import PayPage from './PayPage.jsx';
+import EarlyPage from './EarlyPage.jsx';
 import { Leaf, IconSale, IconBuy, IconNodes, IconRun, IconChat } from './icons.jsx';
 
-const ROUTES = { '': 'sale', buy: 'buy', run: 'run', nodes: 'nodes', pair: 'pair', lounge: 'lounge', pay: 'pay' };
+const ROUTES = { '': 'sale', buy: 'buy', run: 'run', nodes: 'nodes', pair: 'pair', lounge: 'lounge', pay: 'pay', early: 'early' };
 
 function useRoute() {
   const read = () => ROUTES[window.location.hash.replace(/^#\/?/, '').split('?')[0]] || 'sale';
@@ -107,6 +108,7 @@ export default function App() {
         {route === 'lounge' && <LoungePage sale={sale} />}
         {route === 'nodes' && <NodesPage sale={sale} now={now} />}
         {route === 'pay' && <PayPage />}
+        {route === 'early' && <EarlyPage />}
       </main>
 
       {route !== 'pay' && (

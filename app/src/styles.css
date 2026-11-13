@@ -246,3 +246,25 @@ a { color: var(--lime); }
   #counter-sign { position: absolute; inset: 0; border-radius: 0; justify-content: center; }
   #counter-sign img { width: 70%; }
 }
+
+/* ---------- Early Growers (#/early) ---------- */
+.alert.good { background: #183020; color: var(--good); font-weight: 600; }
+.early-stats { flex-direction: row; justify-content: space-around; text-align: center; }
+.early-stats div { display: flex; flex-direction: column; gap: 2px; }
+.early-stats strong { font: 800 34px/1 var(--display); color: var(--lime); }
+.early-badge { flex-direction: row; align-items: center; gap: 16px; border-color: var(--lime); box-shadow: 0 0 0 4px rgba(198, 242, 107, 0.12); }
+.early-badge strong { font: 800 20px var(--display); color: var(--lime); }
+.early-medal { flex: 0 0 auto; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; font-size: 30px; background: radial-gradient(circle, #2f5a1f, #15240f); border: 2px solid var(--lime); }
+.early-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.early-steps li { display: flex; gap: 14px; align-items: flex-start; }
+.early-steps li > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1; }
+.early-steps .tick { flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; border: 2px solid var(--line); color: var(--muted); }
+.early-steps li.done .tick { background: var(--lime); border-color: var(--lime); color: var(--bg); }
+.early-bar { margin-top: 4px; }
+.early-form label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.early-form input { min-height: 50px; padding: 0 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--bg); color: var(--text); font: 500 16px var(--body); }
+.early-form input:focus { border-color: var(--lime); outline: none; }
+.early-facts { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; color: var(--muted); font-size: 14px; }
+.early-cta { flex-direction: row; align-items: center; gap: 14px; border-color: rgba(198, 242, 107, 0.45); text-decoration: none; color: var(--text); }
+.early-cta strong { color: var(--lime); }
+.early-cta .arrow { margin-left: auto; color: var(--lime); font-size: 22px; }
